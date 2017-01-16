@@ -1,0 +1,10 @@
+{
+  "presets": [
+    "es2015-node5",
+    "react"
+  ],
+  "plugins": [
+    "transform-async-to-generator",
+    "transform-object-rest-spread"
+  ]
+}

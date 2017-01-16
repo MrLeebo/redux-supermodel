@@ -1,0 +1,66 @@
+{
+  "name": "redux-supermodel",
+  "version": "0.1.0",
+  "description": "A package of action creator functions and reducers that deal with the state management of REST-like APIs for you... all you need is a URL!",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "babel lib --out-dir dist",
+    "prepublish": "npm run build",
+    "test": "nyc --require babel-core/register mocha -u bdd-lazy-var/rspec --recursive --reporter dot --compilers jsx:babel-core/register --require ./test/setup.js test",
+    "lint": "eslint lib test || true"
+  },
+  "keywords": [
+    "redux",
+    "dispatch",
+    "rest",
+    "api",
+    "resource",
+    "superagent",
+    "ajax"
+  ],
+  "author": "Jeremy Liberman <jeremy@jeremyliberman.com> (http://jeremyliberman.com)",
+  "license": "ISC",
+  "devDependencies": {
+    "babel-cli": "^6.18.0",
+    "babel-eslint": "^7.1.1",
+    "babel-plugin-transform-async-to-generator": "^6.16.0",
+    "babel-plugin-transform-object-rest-spread": "^6.20.2",
+    "babel-polyfill": "^6.20.0",
+    "babel-preset-es2015-node5": "^1.2.0",
+    "babel-preset-react": "^6.16.0",
+    "babel-register": "^6.18.0",
+    "bdd-lazy-var": "^1.2.0",
+    "enzyme": "^2.7.0",
+    "eslint": "^3.13.1",
+    "eslint-config-standard": "^6.2.1",
+    "eslint-plugin-import": "^2.2.0",
+    "eslint-plugin-promise": "^3.4.0",
+    "eslint-plugin-react": "^6.9.0",
+    "eslint-plugin-standard": "^2.0.1",
+    "express": "^4.14.0",
+    "jsdom": "^9.9.1",
+    "mocha": "^3.2.0",
+    "nyc": "^10.0.0",
+    "react-addons-test-utils": "^15.4.2",
+    "react-dom": "^15.4.2",
+    "react-redux": "^5.0.2",
+    "redux": "^3.6.0",
+    "redux-promise-middleware": "^4.2.0",
+    "sinon": "^1.17.7",
+    "supertest": "^2.0.1"
+  },
+  "peerDependencies": {
+    "react": "^15.0.0"
+  },
+  "dependencies": {
+    "superagent": "^3.3.2"
+  },
+  "standard": {
+    "globals": [
+      "describe",
+      "before",
+      "beforeEach",
+      "it"
+    ]
+  }
+}
