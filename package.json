@@ -1,6 +1,6 @@
 {
   "name": "redux-supermodel",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A package of action creator functions and reducers that deal with the state management of REST-like APIs for you... all you need is a URL!",
   "repository": "https://github.com/MrLeebo/redux-supermodel",
   "main": "dist/index.js",
@@ -16,7 +16,6 @@
     "rest",
     "api",
     "resource",
-    "superagent",
     "ajax"
   ],
   "author": "Jeremy Liberman <jeremy@jeremyliberman.com> (http://jeremyliberman.com)",
@@ -47,14 +46,13 @@
     "react-redux": "^5.0.2",
     "redux": "^3.6.0",
     "redux-promise-middleware": "^4.2.0",
-    "sinon": "^1.17.7",
-    "supertest": "^2.0.1"
+    "sinon": "^1.17.7"
   },
   "peerDependencies": {
     "react": "^15.0.0"
   },
   "dependencies": {
-    "superagent": "^3.3.2"
+    "axios": "^0.15.3"
   },
   "standard": {
     "globals": [

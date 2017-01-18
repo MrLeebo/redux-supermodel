@@ -1,26 +1,22 @@
 import React from 'react'
 import { bindActionCreators } from 'redux'
 import { connect } from 'react-redux'
-import TestTable from './TestTable'
+import TodosTable from './TodosTable'
 
 export default function withResource (resource) {
-  class TestComponent extends React.Component {
+  class TodosComponent extends React.Component {
     constructor () {
       super()
       this.handleFetch = this.handleFetch.bind(this)
       this.handleReset = this.handleReset.bind(this)
     }
 
-    componentDidMount () {
-      this.handleFetch()
-    }
-
     handleFetch () {
-      this.props.fetch({ id: this.props.id })
+      return this.props.fetch({ id: this.props.id })
     }
 
     handleReset () {
-      this.props.reset({ reset: true })
+      return this.props.reset({ reset: true })
     }
 
     render () {
@@ -31,7 +27,7 @@ export default function withResource (resource) {
             <button id='refresh' disabled={!resource.ready} onClick={this.handleFetch}>Refresh</button>
             <button id='reset' disabled={!resource.ready} onClick={this.handleReset}>Reset</button>
           </div>
-          <TestTable resource={resource} />
+          <TodosTable resource={resource} />
         </div>
       )
     }
@@ -49,5 +45,5 @@ export default function withResource (resource) {
     }, dispatch)
   }
 
-  return connect(mapStateToProps, mapDispatchToProps)(TestComponent)
+  return connect(mapStateToProps, mapDispatchToProps)(TodosComponent)
 }

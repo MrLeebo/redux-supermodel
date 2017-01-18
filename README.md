@@ -1,6 +1,6 @@
 # redux-supermodel
 
-Streamline the effort it takes for you to communicate between your [Redux](http://redux.js.org/) Store and a REST-like API. This is a package of action creator functions and reducers built with [superagent](https://github.com/visionmedia/superagent) and [redux-promise-middleware](https://github.com/pburtchaell/redux-promise-middleware) that handle the resource state management for you... all you need is a URL!
+Streamline the effort it takes for you to communicate between your [Redux](http://redux.js.org/) Store and a REST-like API. This is a package of action creator functions and reducers built with [axios](https://github.com/mzabriskie/axios) and [redux-promise-middleware](https://github.com/pburtchaell/redux-promise-middleware) that handle the resource state management for you... all you need is a URL!
 
 ## Creating the Client
 
@@ -112,41 +112,39 @@ function mapStateToProps (state) {
 
 A function to create a new REST Client. Available options are:
 
-- `agent : function or object` By default **redux-supermodel** will use [superagent](https://github.com/visionmedia/superagent) as its AJAX agent, but you can substitute a different implementation here or inject a mock agent for testing.
-- `events : {request|response|error}` A hash of events and callback functions to trigger. See below
+- `agent : axios` By default **redux-supermodel** will use [axios](https://github.com/mzabriskie/axios) as its AJAX agent, but you can substitute a different implementation here or inject a mock agent for testing.
+- `before : function(config) => config` A function to invoke before sending the request. Can be used to set-up authentication, headers, or other configuration steps. You will receive the axios request config object and should return a modified config object with your authentication token or other configuration changes.
 
-#### Events
-
-- `request(req, {data, method, url, resource})` Called before the request is sent, allowing you to add headers, authentication, etc
-- `response(res)` Called after the response is parsed
-- `error(err)` Called if there is an error
-
-```js
-const client = createClient('https://example.com/api/v1', {
-  request(req, meta) { console.log('request starting') },
-  response(res) { console.log('response received') },
-  error(err) { console.log('something happened') }
-})
-```
+All other options will be passed as config data to axios.
 
 #### Authentication
 
-Using the `request` event, you can set authentication information that applies to all of the resource calls for a particular client. In this example, we'll assume you already have a redux store that can be imported from **store.js**:
+Using the `before` function, you can set authentication information that applies to all of the resource calls for a particular client. In this example, we'll assume you already have a Redux store that can be imported from **store.js**.
+
+Basic authentication:
 
 ```js
 import { createClient } from 'redux-supermodel'
 import { getState } from './store'
 
-function request (req) {
-  const { username, secret } = getState().currentUser
-
-  // BASIC authentication with a username and password
-  req.auth(username, secret)
-  // Or set a custom header
-  // req.set('X-Auth-Token', secret)
+function before (config) {
+  const { username, password } = getState().currentUser
+  return { ...config, auth: { username, password } }
 }
 
-export default createClient('https://example.com/api/v1', { events: { request } })
+export default createClient('https://example.com/api/v1', { before })
+```
+
+Or using an authentication token:
+
+```js
+function before (config) {
+  const { token } = getState().currentUser
+  const headers = { ...config.headers, 'X-Auth-Token': token }
+  return { ...config, headers }
+}
+
+export default createClient('https://example.com/api/v1', { before })
 ```
 
 ### createResource `client(name, options) => object`
