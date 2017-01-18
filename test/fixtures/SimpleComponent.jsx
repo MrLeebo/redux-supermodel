@@ -2,13 +2,13 @@ import React from 'react'
 import { bindActionCreators } from 'redux'
 import { connect } from 'react-redux'
 
-export default function withResource (resource) {
+export default function withResource (resource, map = (payload) => payload.data) {
   function SimpleComponent ({ resource }) {
     const { ready, payload, error } = resource
 
     if (!ready) return <div>Please wait...</div>
     if (error) return <div className='error'>{error.response.data}</div>
-    return <div id='root'>{payload.data}</div>
+    return <div id='root'>{map(payload)}</div>
   }
 
   function mapStateToProps (state) {

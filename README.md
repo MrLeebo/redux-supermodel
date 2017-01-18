@@ -154,6 +154,7 @@ A function to create a new Resource. Available options are:
 - `url : string or function` This gets appended to the end of the Client `baseUrl` to build the URL that links to the endpoint
 - `urlRoot : string or function` Like `url`, however if the request data contains an "id" it will be appended to the URL as well
 - `idAttribute : string` Defaults to "id" but you can change it if your resource has another identifier
+- `defaultPayload : anything` Sets the payload for before the resource has received anything from the server. Otherwise the payload will be `undefined`
 
 #### Building URLs
 
