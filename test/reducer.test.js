@@ -15,16 +15,11 @@ describe('reducer', () => {
   })
 
   describe('reset', () => {
-    it('should initialize resource', () => {
+    it('should destroy resource', () => {
       action = { type: '@@redux-supermodel/RESET', meta: { resourceName: 'blogs' } }
       run()
 
-      assert.deepEqual(subject, { blogs: {
-        initialized: true,
-        busy: false,
-        payload: undefined,
-        previous: null
-      } })
+      assert.deepEqual(subject, {})
     })
 
     it('should set resource to given value', () => {
@@ -40,6 +35,23 @@ describe('reducer', () => {
         initialized: true,
         busy: false,
         payload: { a: 1 },
+        previous: null
+      } })
+    })
+
+    it('should accept null as value', () => {
+      action = {
+        type: '@@redux-supermodel/RESET',
+        payload: null,
+        meta: { resourceName: 'blogs' }
+      }
+
+      run()
+
+      assert.deepEqual(subject, { blogs: {
+        initialized: true,
+        busy: false,
+        payload: null,
         previous: null
       } })
     })

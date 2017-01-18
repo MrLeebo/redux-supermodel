@@ -253,3 +253,5 @@ Reset is another action creator that will set the resource's payload to whatever
 // Assigns the resource state without making an AJAX call
 this.props.resetBlogs([{ title: 'My first blog' }])
 ```
+
+If you call `reset()` without any parameters, it will destroy all of the state associated with your resource, it will be as if it was brand new.
