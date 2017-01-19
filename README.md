@@ -32,7 +32,7 @@ Now that we have our ingredients, time to put everything together. We are going 
 
 ```js
 function MyComponent ({blogs, createBlog}) {
-  const { ready, error, payload } = blogs;
+  const { ready, error, payload } = blogs
 
   if (!ready) return <div className="loading">Please wait...</div>
   if (error) return <div className="error">{error.message}</div>
@@ -82,12 +82,12 @@ npm install --save redux-promise-middleware
 ```js
 // store.js
 
-import { createStore, applyMiddleware, compose, combineReducers } from 'redux';
-import promiseMiddleware from 'redux-promise-middleware';
+import { createStore, applyMiddleware, compose, combineReducers } from 'redux'
+import promiseMiddleware from 'redux-promise-middleware'
 import { reducer as resource } from 'redux-supermodel'
 
-const rootReducer = combineReducers({ resource });
-export default compose(applyMiddleware(promiseMiddleware()))(createStore)(rootReducer);
+const rootReducer = combineReducers({ resource })
+export default compose(applyMiddleware(promiseMiddleware()))(createStore)(rootReducer)
 ```
 
 Be sure to mount the reducer to the `resource` key. If for some reason you can't use that name and you must call it something else, you will need to pass the `mountedAt` option when you call the `mapStateToProps` resource state function:
@@ -156,7 +156,8 @@ A function to create a new Resource. Available options are:
 - `url : string or function` This gets appended to the end of the Client `baseUrl` to build the URL that links to the endpoint
 - `urlRoot : string or function` Like `url`, however if the request data contains an "id" it will be appended to the URL as well
 - `idAttribute : string` Defaults to "id" but you can change it if your resource has another identifier
-- `defaultPayload : anything` Sets the payload for before the resource has received anything from the server. Otherwise the payload will be `undefined`
+- `defaultPayload : any` Sets the payload for before the resource has received anything from the server. Otherwise the payload will be `undefined`
+- `transform : function(state, isFulfilled, meta) => nextState` When your resource is about to receive data, you may include a transform function to describe how you want to store that data. The default behavior is an identity function, whatever data gets received is what gets stored in the state.
 
 #### Building URLs
 
@@ -190,7 +191,7 @@ blogs = client('blogs', { urlRoot: 'blogs', idAttribute: 'slug' })
 blogs.fetch({ slug: 'my-first-blog' })
 ```
 
-### `resource(state, options) => object` State To Props Function
+#### `resource(state, options) => object` State To Props Function
 
 ```js
 function mapStateToProps (state) {
@@ -213,9 +214,69 @@ The prop object will contain the following values:
 - `payload` This is where the data from the server goes
 - `previous` When an AJAX request is pending, the original payload goes here
 
-#### Optimistic Updates
+#### Transformations
 
-When an AJAX request is dispatched, the payload is optimistically updated with the input data. The original payload data is copied to the `previous` property. If the request succeeds, the new data from the server will overwrite the `payload`. If the request fails, the `previous` value will overwrite the `payload` and the response from the server will be stored in the `error` property.
+You can control how the server's response to your AJAX request gets stored in your resource's state by defining a transform function.
+
+The transform function has the following signature:
+
+```js
+function transform (state, previousState, isFulfilled, meta) => nextState
+```
+
+These are the parameters you will receive
+
+- `payload : any` The new payload of the resource. If `isFulfilled` is true, this will be the response from the server, otherwise it will be the input data from the request
+- `previous : any` The old payload of the resource
+- `isFulfilled : bool` True if the request has been fulfilled (i.e. the data came from the server). Otherwise the request is still pending and `state` contains the input data sent to the server.
+- `meta : object` The action metadata
+
+##### Optimistic Updates
+
+When an AJAX request is dispatched, the current state of the resource does not change until the server responds. For some applications, such as form-bound models, you may want to update the state optimistically with the request data before the server response has been fulfilled. You can implement optimistic updates by defining the transform function as a simple identity function:
+
+```js
+const optimisticUpdates = x => x
+blogs = client('blogs', { transform: optimisticUpdates })
+```
+
+##### Deleting an item from an index by marking it
+
+Many REST-like endpoints will respond to a DELETE action with a `204 No Content` response, but you probably don't want to replace your resource payload with no content. One thing you can do is modify your resource payload in redux with a `deleted: true` value instead of removing it entirely. You can use a transform function to do that.
+
+```js
+function markDeleted (payload, previous, isFulfilled, meta) {
+  // Unless you want to use Optimistic Updates, keep the previous
+  // payload until the request is fulfilled.
+  if (!isFulfilled) return previous
+
+  // Instead of deleting the resource state from our Redux store
+  // outright, copy the previous state and add the "deleted" flag
+  // so it can be displayed as such in the UI (e.g. with a
+  // strikethrough or something)
+  if (meta.action == 'destroy') {
+    const { id } = payload
+    let { data } = previous
+    const index = data && data.findIndex(x => x.id === id)
+
+    if (index >= 0) {
+      // Make a copy of the array because we don't want to modify
+      // the existing reference
+      data = data.slice(0)
+
+      data[index] = { ...data[index], deleted: true }
+      return { ...previous, data }
+    }
+
+    return previous
+  }
+
+  // For all other cases, take the new payload
+  return payload
+}
+
+blogs = client('blogs', { transform: markDeleted })
+```
 
 ### `resource` Action Creators
 

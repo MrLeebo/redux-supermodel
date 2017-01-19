@@ -6,8 +6,10 @@ export default function TodosTable ({resource}) {
   if (!ready) return <div id='loading'>Please wait...</div>
   if (error) return <div className='error'>{error.response.data}</div>
 
-  const rows = payload.data && payload.data.map(({title}) => (
-    <tr key={title}><td>{title}</td></tr>
+  const rows = payload.data && payload.data.map((item) => (
+    <tr key={item.id}>
+      <td>{item.deleted && <del>{item.title}</del> || item.title}</td>
+    </tr>
   ))
 
   return (

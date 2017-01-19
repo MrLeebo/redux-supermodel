@@ -58,12 +58,30 @@ describe('reducer', () => {
   })
 
   describe('request pending', () => {
-    it('should set state', () => {
+    it('should ignore payload', () => {
       state = { blogs: {} }
       action = {
         type: '@@redux-supermodel/REQUEST_PENDING',
         payload: { id: 123 },
-        meta: { resourceName: 'blogs' }
+        meta: { resourceName: 'blogs', definition: { url: 'blogs' } }
+      }
+
+      run()
+
+      assert.deepEqual(subject, { blogs: {
+        initialized: true,
+        busy: true,
+        payload: undefined,
+        previous: undefined
+      } })
+    })
+
+    it('should set payload with identity transform', () => {
+      state = { blogs: {} }
+      action = {
+        type: '@@redux-supermodel/REQUEST_PENDING',
+        payload: { id: 123 },
+        meta: { resourceName: 'blogs', definition: { url: 'blogs', transform: x => x } }
       }
 
       run()
@@ -80,7 +98,12 @@ describe('reducer', () => {
   describe('request fulfilled', () => {
     it('should set state', () => {
       state = { blogs: { busy: true, payload: { id: 123 } } }
-      action = { type: '@@redux-supermodel/REQUEST_FULFILLED', payload: { id: 123, owner: 'Steve' }, meta: { resourceName: 'blogs' } }
+      action = {
+        type: '@@redux-supermodel/REQUEST_FULFILLED',
+        payload: { id: 123, owner: 'Steve' },
+        meta: { resourceName: 'blogs', definition: { url: 'blogs' } }
+      }
+
       run()
 
       assert.deepEqual(subject, { blogs: {
@@ -95,13 +118,19 @@ describe('reducer', () => {
   describe('request rejected', () => {
     it('should set state', () => {
       state = { blogs: { busy: true, payload: { id: 123 } } }
-      action = { type: '@@redux-supermodel/REQUEST_REJECTED', payload: 'something broke', error: true, meta: { resourceName: 'blogs' } }
+      action = {
+        type: '@@redux-supermodel/REQUEST_REJECTED',
+        payload: 'something broke',
+        error: true,
+        meta: { resourceName: 'blogs', definition: { url: 'blogs' } }
+      }
+
       run()
 
       assert.deepEqual(subject, { blogs: {
         initialized: true,
         busy: false,
-        payload: undefined,
+        payload: { id: 123 },
         previous: null,
         error: 'something broke'
       } })

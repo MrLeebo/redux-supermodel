@@ -1,6 +1,6 @@
 {
   "name": "redux-supermodel",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "A package of action creator functions and reducers that deal with the state management of REST-like APIs for you... all you need is a URL!",
   "repository": "https://github.com/MrLeebo/redux-supermodel",
   "main": "dist/index.js",
@@ -30,6 +30,7 @@
     "babel-preset-react": "^6.16.0",
     "babel-register": "^6.18.0",
     "bdd-lazy-var": "^1.2.0",
+    "body-parser": "^1.16.0",
     "enzyme": "^2.7.0",
     "eslint": "^3.13.1",
     "eslint-config-standard": "^6.2.1",

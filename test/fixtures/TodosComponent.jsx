@@ -41,6 +41,7 @@ export default function withResource (resource) {
     return bindActionCreators({
       fetch: resource.fetch,
       create: resource.create,
+      destroy: resource.destroy,
       reset: resource.reset
     }, dispatch)
   }
