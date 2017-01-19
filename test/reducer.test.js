@@ -1,5 +1,6 @@
 import assert from 'assert'
 import reducer from '../lib/reducer'
+import * as types from '../lib/actionTypes'
 
 describe('reducer', () => {
   let subject
@@ -16,7 +17,7 @@ describe('reducer', () => {
 
   describe('reset', () => {
     it('should destroy resource', () => {
-      action = { type: '@@redux-supermodel/RESET', meta: { resourceName: 'blogs' } }
+      action = { type: types.RESET, meta: { resourceName: 'blogs' } }
       run()
 
       assert.deepEqual(subject, {})
@@ -24,7 +25,7 @@ describe('reducer', () => {
 
     it('should set resource to given value', () => {
       action = {
-        type: '@@redux-supermodel/RESET',
+        type: types.RESET,
         payload: { a: 1 },
         meta: { resourceName: 'blogs' }
       }
@@ -41,7 +42,7 @@ describe('reducer', () => {
 
     it('should accept null as value', () => {
       action = {
-        type: '@@redux-supermodel/RESET',
+        type: types.RESET,
         payload: null,
         meta: { resourceName: 'blogs' }
       }
@@ -61,7 +62,7 @@ describe('reducer', () => {
     it('should ignore payload', () => {
       state = { blogs: {} }
       action = {
-        type: '@@redux-supermodel/REQUEST_PENDING',
+        type: types.PENDING,
         payload: { id: 123 },
         meta: { resourceName: 'blogs', definition: { url: 'blogs' } }
       }
@@ -79,7 +80,7 @@ describe('reducer', () => {
     it('should set payload with identity transform', () => {
       state = { blogs: {} }
       action = {
-        type: '@@redux-supermodel/REQUEST_PENDING',
+        type: types.PENDING,
         payload: { id: 123 },
         meta: { resourceName: 'blogs', definition: { url: 'blogs', transform: x => x } }
       }
@@ -99,7 +100,7 @@ describe('reducer', () => {
     it('should set state', () => {
       state = { blogs: { busy: true, payload: { id: 123 } } }
       action = {
-        type: '@@redux-supermodel/REQUEST_FULFILLED',
+        type: types.FULFILLED,
         payload: { id: 123, owner: 'Steve' },
         meta: { resourceName: 'blogs', definition: { url: 'blogs' } }
       }
@@ -119,7 +120,7 @@ describe('reducer', () => {
     it('should set state', () => {
       state = { blogs: { busy: true, payload: { id: 123 } } }
       action = {
-        type: '@@redux-supermodel/REQUEST_REJECTED',
+        type: types.REJECTED,
         payload: 'something broke',
         error: true,
         meta: { resourceName: 'blogs', definition: { url: 'blogs' } }
@@ -139,7 +140,7 @@ describe('reducer', () => {
 
   describe('invalid action', () => {
     it('should throw', () => {
-      const type = '@@redux-supermodel/INVALID'
+      const type = `${types.PREFIX}INVALID`
       action = { type }
 
       assert.throws(run, `Invalid ${type}: Missing "meta.resourceName" property`)
@@ -148,7 +149,7 @@ describe('reducer', () => {
 
   describe('unknown action', () => {
     it('should throw', () => {
-      const type = '@@redux-supermodel/UNKNOWN'
+      const type = `${types.PREFIX}UNKNOWN`
       action = { type, meta: { resourceName: 'blogs' } }
       assert.throws(run, `Unrecognized action type: ${type}`)
     })
