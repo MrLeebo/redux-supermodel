@@ -1,6 +1,6 @@
 # redux-supermodel
 
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/13429c5aaf274e1189e839675cb31969)](https://www.codacy.com/app/MrLeebo/redux-supermodel?utm_source=github.com&utm_medium=referral&utm_content=MrLeebo/redux-supermodel&utm_campaign=badger)
+[![Build Status](https://travis-ci.org/MrLeebo/redux-supermodel.svg?branch=master)](https://travis-ci.org/MrLeebo/redux-supermodel) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/13429c5aaf274e1189e839675cb31969)](https://www.codacy.com/app/MrLeebo/redux-supermodel?utm_source=github.com&utm_medium=referral&utm_content=MrLeebo/redux-supermodel&utm_campaign=badger)
 
 Streamline the effort it takes for you to communicate between your [Redux](http://redux.js.org/) Store and a REST-like API. This is a package of action creator functions and reducers built with [axios](https://github.com/mzabriskie/axios) and [redux-promise-middleware](https://github.com/pburtchaell/redux-promise-middleware) that handle the resource state management for you... all you need is a URL!
 
