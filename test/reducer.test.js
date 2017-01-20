@@ -24,10 +24,11 @@ describe('reducer', () => {
     })
 
     it('should set resource to given value', () => {
+      const meta = { resourceName: 'blogs' }
       action = {
         type: types.RESET,
         payload: { a: 1 },
-        meta: { resourceName: 'blogs' }
+        meta
       }
 
       run()
@@ -36,15 +37,17 @@ describe('reducer', () => {
         initialized: true,
         busy: false,
         payload: { a: 1 },
-        previous: null
+        previous: null,
+        meta
       } })
     })
 
     it('should accept null as value', () => {
+      const meta = { resourceName: 'blogs' }
       action = {
         type: types.RESET,
         payload: null,
-        meta: { resourceName: 'blogs' }
+        meta
       }
 
       run()
@@ -53,7 +56,8 @@ describe('reducer', () => {
         initialized: true,
         busy: false,
         payload: null,
-        previous: null
+        previous: null,
+        meta
       } })
     })
   })
@@ -61,10 +65,11 @@ describe('reducer', () => {
   describe('request pending', () => {
     it('should ignore payload', () => {
       state = { blogs: {} }
+      const meta = { resourceName: 'blogs', definition: { url: 'blogs' } }
       action = {
         type: types.PENDING,
         payload: { id: 123 },
-        meta: { resourceName: 'blogs', definition: { url: 'blogs' } }
+        meta
       }
 
       run()
@@ -73,16 +78,18 @@ describe('reducer', () => {
         initialized: true,
         busy: true,
         payload: undefined,
-        previous: undefined
+        previous: undefined,
+        meta
       } })
     })
 
     it('should set payload with identity transform', () => {
       state = { blogs: {} }
+      const meta = { resourceName: 'blogs', definition: { url: 'blogs', transform: x => x } }
       action = {
         type: types.PENDING,
         payload: { id: 123 },
-        meta: { resourceName: 'blogs', definition: { url: 'blogs', transform: x => x } }
+        meta
       }
 
       run()
@@ -91,7 +98,8 @@ describe('reducer', () => {
         initialized: true,
         busy: true,
         payload: { id: 123 },
-        previous: undefined
+        previous: undefined,
+        meta
       } })
     })
   })
@@ -99,10 +107,11 @@ describe('reducer', () => {
   describe('request fulfilled', () => {
     it('should set state', () => {
       state = { blogs: { busy: true, payload: { id: 123 } } }
+      const meta = { resourceName: 'blogs', definition: { url: 'blogs' } }
       action = {
         type: types.FULFILLED,
         payload: { id: 123, owner: 'Steve' },
-        meta: { resourceName: 'blogs', definition: { url: 'blogs' } }
+        meta
       }
 
       run()
@@ -111,7 +120,8 @@ describe('reducer', () => {
         initialized: true,
         busy: false,
         payload: { id: 123, owner: 'Steve' },
-        previous: null
+        previous: null,
+        meta
       } })
     })
   })
@@ -119,11 +129,12 @@ describe('reducer', () => {
   describe('request rejected', () => {
     it('should set state', () => {
       state = { blogs: { busy: true, payload: { id: 123 } } }
+      const meta = { resourceName: 'blogs', definition: { url: 'blogs' } }
       action = {
         type: types.REJECTED,
         payload: 'something broke',
         error: true,
-        meta: { resourceName: 'blogs', definition: { url: 'blogs' } }
+        meta
       }
 
       run()
@@ -133,7 +144,8 @@ describe('reducer', () => {
         busy: false,
         payload: { id: 123 },
         previous: null,
-        error: 'something broke'
+        error: 'something broke',
+        meta
       } })
     })
   })

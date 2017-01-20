@@ -19,7 +19,7 @@ Basic authentication:
 import { createClient } from 'redux-supermodel'
 import { getState } from './store'
 
-function basicAuthenticate (config) {
+function basicAuthentication (config) {
   const { username, password } = getState().currentUser
   return { ...config, auth: { username, password } }
 }
@@ -47,7 +47,7 @@ A function to create a new Resource. Available options are:
 - `urlRoot : string or function` Like `url`, however if the request data contains an "id" it will be appended to the URL as well
 - `idAttribute : string` Defaults to "id" but you can change it if your resource has another identifier
 - `defaultPayload : any` Sets the payload for before the resource has received anything from the server. Otherwise the payload will be `undefined`
-- `transform : function(state, isFulfilled, meta) => nextState` When your resource is about to receive data, you may include a transform function to describe how you want to store that data. The default behavior is an identity function, whatever data gets received is what gets stored in the state.
+- `transform : function(payload, previous, isFulfilled, meta) => nextPayload` When your resource is about to receive data, you may include a transform function to describe how you want to store that data. The default behavior is an identity function, whatever data gets received is what gets stored in the state.
 
 #### Building URLs
 
@@ -98,11 +98,16 @@ When you call `client(name)` you are going to get back a resource that you can u
 
 The prop object will contain the following values:
 
-- `ready` True if there are no AJAX requests pending and at least one request has finished
-- `busy` True if an AJAX request is currently pending
-- `error` If the request failed, the error goes here
-- `payload` This is where the data from the server goes
-- `previous` When an AJAX request is pending, the original payload goes here
+- `initialized : bool` Becomes true the first time any action creator has been dispatched for this resource, false otherwise
+- `ready : bool` True if there are no AJAX requests pending and at least one request has been dispatched
+- `busy : bool` True if any AJAX request is currently pending
+- `error : object` If the request failed, the error goes here. This is the axios error object, see [Handling Errors](https://github.com/mzabriskie/axios#handling-errors) for information
+- `payload : anything` The resource data. After a successful AJAX request, the payload will be an axios [response](https://github.com/mzabriskie/axios#response-schema)
+- `previous : anything` When an AJAX request is pending, the original payload is copied here. It will be copied back if the request gets rejected
+- `pendingFetch : bool` True if there is a pending GET request
+- `pendingCreate : bool` True if there is a pending POST request
+- `pendingUpdate : bool` True if there is a pending PUT request
+- `pendingDestroy : bool` True if there is a pending DELETE request
 
 ##### Mounting `redux-supermodel` to a different key than `"resource"`
 
@@ -131,19 +136,19 @@ You can control how the server's response to your AJAX request gets stored in yo
 The transform function has the following signature:
 
 ```js
-function transform (state, previousState, isFulfilled, meta) => nextState
+function transform (payload, previous, isFulfilled, meta) => nextPayload
 ```
 
 These are the parameters you will receive
 
 - `payload : any` The new payload of the resource. If `isFulfilled` is true, this will be the response from the server, otherwise it will be the input data from the request
 - `previous : any` The old payload of the resource
-- `isFulfilled : bool` True if the request has been fulfilled (i.e. the data came from the server). Otherwise the request is still pending and `state` contains the input data sent to the server.
+- `isFulfilled : bool` True if the request has been fulfilled (i.e. the data came from the server). Otherwise the request is still pending and `payload` contains the input data sent to the server.
 - `meta : object` The action metadata
 
 ##### Optimistic Updates
 
-When an AJAX request is dispatched, the current state of the resource does not change until the server responds. For some applications, such as form-bound models, you may want to update the state optimistically with the request data before the server response has been fulfilled. You can implement optimistic updates by defining the transform function as a simple identity function:
+When an AJAX request is dispatched, the current payload of the resource does not change until the server responds. For some applications, such as form-bound models, you may want to update the payload optimistically with the request data before the server response has been fulfilled. You can implement optimistic updates by defining the transform function as a simple identity function:
 
 ```js
 const optimisticUpdates = x => x
@@ -160,8 +165,8 @@ function markDeleted (payload, previous, isFulfilled, meta) {
   // payload until the request is fulfilled.
   if (!isFulfilled) return previous
 
-  // Instead of deleting the resource state from our Redux store
-  // outright, copy the previous state and add the "deleted" flag
+  // Instead of deleting the resource payload from our Redux store
+  // outright, copy the previous payload and add the "deleted" flag
   // so it can be displayed as such in the UI (e.g. with a
   // strikethrough or something)
   if (meta.action == 'destroy') {
@@ -211,8 +216,8 @@ When invoked, they will create an action such as this:
 ```js
 {
   type: '@@redux-supermodel/REQUEST',
-  payload: req.promise(),
-  meta: { action, method, url, resource },
+  payload: requestAsPromise,
+  meta: { action, method, url, resourceName, inputData, definition },
 }
 ```
 
@@ -223,8 +228,21 @@ Since the payload is a promise, this action will be handled by `redux-promise-mi
 Reset is another action creator that will set the resource's payload to whatever you pass into it. You can use this to pre-load a resource's state or to dump everything when you unmount the component.
 
 ```js
-// Assigns the resource state without making an AJAX call
+// Assigns the resource payload without making an AJAX call
 this.props.resetBlogs([{ title: 'My first blog' }])
 ```
 
-If you call `reset()` without any parameters, it will destroy all of the state associated with your resource, it will be as if it was brand new.
+If you call `reset()` without any parameters, it will destroy the state associated with your resource, it will be as if it was brand new.
+
+### Other action creators
+
+#### :boom: NUKE :boom:
+
+This action will completely obliterate the entire `redux-supermodel` store, restoring everything to the way it was when your application first loaded. Sounds like overkill, but you might find it useful when writing integration tests.
+
+```js
+import { nuke } from 'redux-supermodel'
+import { dispatch } from './store'
+
+dispatch(nuke) // burn, baby burn
+```

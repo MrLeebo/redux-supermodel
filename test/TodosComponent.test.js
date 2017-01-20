@@ -111,12 +111,9 @@ describe('TodosComponent', () => {
 
     await reset()
 
-    assert.deepEqual(getResource(), {
-      busy: false,
-      ready: false,
-      payload: undefined,
-      previous: undefined
-    })
+    const { initialized, payload } = getResource()
+    assert(!initialized)
+    assert(!payload)
   })
 
   it('should transform delete state to flag', async function () {
