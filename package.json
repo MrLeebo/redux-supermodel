@@ -42,15 +42,13 @@
     "jsdom": "^9.9.1",
     "mocha": "^3.2.0",
     "nyc": "^10.0.0",
+    "react": "^15.4.2",
     "react-addons-test-utils": "^15.4.2",
     "react-dom": "^15.4.2",
     "react-redux": "^5.0.2",
     "redux": "^3.6.0",
     "redux-promise-middleware": "^4.2.0",
     "sinon": "^1.17.7"
-  },
-  "peerDependencies": {
-    "react": "^15.0.0"
   },
   "dependencies": {
     "axios": "^0.15.3"
