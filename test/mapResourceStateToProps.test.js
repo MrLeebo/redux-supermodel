@@ -1,16 +1,14 @@
+/* global $subject, $result */
 import assert from 'assert'
 import withDefinition from '../lib/mapResourceStateToProps'
 
 describe('mapResourceStateToProps', () => {
-  let subject = withDefinition('test')
-
-  function run (state) {
-    return subject({ resource: { test: state } })
-  }
+  subject(() => withDefinition('test'))
+  def('result', () => state => $subject({ resource: { test: state } }))
 
   it('should get prop', () => {
-    const result = run({ initialized: true, payload: { pass: true } })
-    assert.deepEqual(result, {
+    const state = { initialized: true, payload: { pass: true } }
+    assert.deepEqual($result(state), {
       initialized: true,
       payload: { pass: true },
       pendingCreate: false,
@@ -22,46 +20,49 @@ describe('mapResourceStateToProps', () => {
   })
 
   it('should set pendingFetch', () => {
-    const result = run({ initialized: true, busy: true, meta: { action: 'fetch' } })
-    assert(result.pendingFetch)
+    const state = { initialized: true, busy: true, meta: { action: 'fetch' } }
+    assert($result(state).pendingFetch)
   })
 
   it('should set pendingCreate', () => {
-    const result = run({ initialized: true, busy: true, meta: { action: 'create' } })
-    assert(result.pendingCreate)
+    const state = { initialized: true, busy: true, meta: { action: 'create' } }
+    assert($result(state).pendingCreate)
   })
 
   it('should set pendingUpdate', () => {
-    const result = run({ initialized: true, busy: true, meta: { action: 'update' } })
-    assert(result.pendingUpdate)
+    const state = { initialized: true, busy: true, meta: { action: 'update' } }
+    assert($result(state).pendingUpdate)
   })
 
   it('should set pendingDestroy', () => {
-    const result = run({ initialized: true, busy: true, meta: { action: 'destroy' } })
-    assert(result.pendingDestroy)
+    const state = { initialized: true, busy: true, meta: { action: 'destroy' } }
+    assert($result(state).pendingDestroy)
   })
 
   it('should set custom prop', () => {
-    const result = run({ initialized: true, wingding: true })
-    assert(result.wingding)
+    const state = { initialized: true, wingding: true }
+    assert($result(state).wingding)
   })
 
-  it('should set payload to default for no state', () => {
+  describe('with default payload', () => {
     const defaultPayload = Symbol()
-    subject = withDefinition('test', { defaultPayload })
-    const result = run()
-    assert.equal(result.payload, defaultPayload)
+    subject(() => withDefinition('test', { defaultPayload }))
+
+    it('should set payload to default for no state', () => {
+      assert.equal($result().payload, defaultPayload)
+    })
+
+    it('should set payload to default for partial state', () => {
+      const state = { initialized: true, payload: null }
+      assert.equal($result(state).payload, defaultPayload)
+    })
   })
 
-  it('should set payload to default for partial state', () => {
-    const defaultPayload = Symbol()
-    subject = withDefinition('test', { defaultPayload })
-    const result = run({ initialized: true, payload: null })
-    assert.equal(result.payload, defaultPayload)
-  })
+  describe('with state mounted to "fizzbuss"', () => {
+    def('result', () => $subject({ fizzbuzz: { test: { initialized: true } } }, { mountedAt: 'fizzbuzz' }))
 
-  it('should support mountedAt option', () => {
-    const result = subject({ fizzbuzz: { test: { initialized: true } } }, { mountedAt: 'fizzbuzz' })
-    assert(result.initialized)
+    it('should support mountedAt option', () => {
+      assert($result.initialized)
+    })
   })
 })

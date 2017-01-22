@@ -1,178 +1,168 @@
+/* global $subject, $state */
 import assert from 'assert'
 import reducer from '../lib/reducer'
 import * as types from '../lib/actionTypes'
 
 describe('reducer', () => {
-  let subject
-  let state
-  let action
-
-  function run () {
-    subject = reducer(state, action)
-  }
-
-  before(() => {
-    state = action = undefined
-  })
+  subject(() => action => reducer($state, action))
+  def('state', () => ({}))
 
   describe('reset', () => {
     it('should destroy resource', () => {
-      action = { type: types.RESET, meta: { resourceName: 'blogs' } }
-      run()
-
-      assert.deepEqual(subject, {})
+      const action = { type: types.RESET, meta: { resourceName: 'blogs' } }
+      assert.deepEqual($subject(action), {})
     })
 
     it('should set resource to given value', () => {
       const meta = { resourceName: 'blogs' }
-      action = {
+      const action = {
         type: types.RESET,
         payload: { a: 1 },
         meta
       }
 
-      run()
+      const expected = {
+        blogs: {
+          initialized: true,
+          busy: false,
+          payload: { a: 1 },
+          previous: null,
+          meta
+        }
+      }
 
-      assert.deepEqual(subject, { blogs: {
-        initialized: true,
-        busy: false,
-        payload: { a: 1 },
-        previous: null,
-        meta
-      } })
+      assert.deepEqual($subject(action), expected)
     })
 
     it('should accept null as value', () => {
       const meta = { resourceName: 'blogs' }
-      action = {
+      const action = {
         type: types.RESET,
         payload: null,
         meta
       }
 
-      run()
+      const expected = {
+        blogs: {
+          initialized: true,
+          busy: false,
+          payload: null,
+          previous: null,
+          meta
+        }
+      }
 
-      assert.deepEqual(subject, { blogs: {
-        initialized: true,
-        busy: false,
-        payload: null,
-        previous: null,
-        meta
-      } })
+      assert.deepEqual($subject(action), expected)
     })
   })
 
-  describe('request pending', () => {
-    it('should ignore payload', () => {
-      state = { blogs: {} }
+  describe('with empty state', () => {
+    def('state', () => ({ blogs: {} }))
+
+    it('should ignore payload on pending', () => {
       const meta = { resourceName: 'blogs', definition: { url: 'blogs' } }
-      action = {
+      const action = {
         type: types.PENDING,
         payload: { id: 123 },
         meta
       }
 
-      run()
+      const expected = {
+        blogs: {
+          initialized: true,
+          busy: true,
+          payload: undefined,
+          previous: undefined,
+          meta
+        }
+      }
 
-      assert.deepEqual(subject, { blogs: {
-        initialized: true,
-        busy: true,
-        payload: undefined,
-        previous: undefined,
-        meta
-      } })
+      assert.deepEqual($subject(action), expected)
     })
 
-    it('should set payload with identity transform', () => {
-      state = { blogs: {} }
+    it('should set payload with identity transform on pending', () => {
       const meta = { resourceName: 'blogs', definition: { url: 'blogs', transform: x => x } }
-      action = {
+      const action = {
         type: types.PENDING,
         payload: { id: 123 },
         meta
       }
 
-      run()
+      const expected = {
+        blogs: {
+          initialized: true,
+          busy: true,
+          payload: { id: 123 },
+          previous: undefined,
+          meta
+        }
+      }
 
-      assert.deepEqual(subject, { blogs: {
-        initialized: true,
-        busy: true,
-        payload: { id: 123 },
-        previous: undefined,
-        meta
-      } })
+      assert.deepEqual($subject(action), expected)
     })
   })
 
-  describe('request fulfilled', () => {
-    it('should set state', () => {
-      state = { blogs: { busy: true, payload: { id: 123 } } }
+  describe('with pending state', () => {
+    def('state', () => ({ blogs: { busy: true, payload: { id: 123 } } }))
+
+    it('should set fulfilled', () => {
       const meta = { resourceName: 'blogs', definition: { url: 'blogs' } }
-      action = {
+      const action = {
         type: types.FULFILLED,
         payload: { id: 123, owner: 'Steve' },
         meta
       }
 
-      run()
+      const expected = {
+        blogs: {
+          initialized: true,
+          busy: false,
+          payload: { id: 123, owner: 'Steve' },
+          previous: null,
+          meta
+        }
+      }
 
-      assert.deepEqual(subject, { blogs: {
-        initialized: true,
-        busy: false,
-        payload: { id: 123, owner: 'Steve' },
-        previous: null,
-        meta
-      } })
+      assert.deepEqual($subject(action), expected)
     })
-  })
 
-  describe('request rejected', () => {
-    it('should set state', () => {
-      state = { blogs: { busy: true, payload: { id: 123 } } }
+    it('should set rejected', () => {
       const meta = { resourceName: 'blogs', definition: { url: 'blogs' } }
-      action = {
+      const action = {
         type: types.REJECTED,
         payload: 'something broke',
         error: true,
         meta
       }
 
-      run()
-
-      assert.deepEqual(subject, { blogs: {
+      const expected = { blogs: {
         initialized: true,
         busy: false,
         payload: { id: 123 },
         previous: null,
         error: 'something broke',
         meta
-      } })
+      }
+      }
+
+      assert.deepEqual($subject(action), expected)
     })
   })
 
-  describe('invalid action', () => {
-    it('should throw', () => {
-      const type = `${types.PREFIX}INVALID`
-      action = { type }
-
-      assert.throws(run, `Invalid ${type}: Missing "meta.resourceName" property`)
-    })
+  it('should throw for invalid action', () => {
+    const type = `${types.PREFIX}INVALID`
+    const action = { type }
+    assert.throws(() => $subject(action), `Invalid ${type}: Missing "meta.resourceName" property`)
   })
 
-  describe('unknown action', () => {
-    it('should throw', () => {
-      const type = `${types.PREFIX}UNKNOWN`
-      action = { type, meta: { resourceName: 'blogs' } }
-      assert.throws(run, `Unrecognized action type: ${type}`)
-    })
+  it('should throw for unknown action', () => {
+    const type = `${types.PREFIX}UNKNOWN`
+    const action = { type, meta: { resourceName: 'blogs' } }
+    assert.throws(() => $subject(action), `Unrecognized action type: ${type}`)
   })
 
-  describe('other action', () => {
-    it('should ignore', () => {
-      action = { type: '???' }
-      run()
-
-      assert.deepEqual(subject, state)
-    })
+  it('should ignore other action', () => {
+    const action = { type: '???' }
+    assert.deepEqual($subject(action), $state)
   })
 })

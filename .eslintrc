@@ -4,6 +4,10 @@
     "standard",
     "plugin:react/recommended"
   ],
+  "globals": {
+    "def": false,
+    "subject": false
+  },
   "env": {
     "mocha": true
   },

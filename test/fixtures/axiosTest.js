@@ -29,7 +29,6 @@ export default function axiosTest (app) {
   }, handleError)
 
   instance.interceptors.response.use((response) => {
-    server.close()
     return Promise.resolve(response)
   }, handleError)
 

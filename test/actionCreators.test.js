@@ -1,9 +1,11 @@
+/* global $subject */
 import assert from 'assert'
 import { resourceActionCreators } from '../lib/actionCreators'
 
 describe('actionCreators', () => {
-  let subject
   const baseUrl = 'http://localhost'
+
+  def('subject', () => resourceActionCreators(baseUrl, 'blogs', { url: 'blogs' }))
 
   it('should require resource', () => {
     assert.throws(resourceActionCreators, 'Resource definition required')
@@ -16,9 +18,8 @@ describe('actionCreators', () => {
 
   it('should generate action creators', () => {
     const actions = ['reset', 'fetch', 'create', 'update', 'destroy']
-    subject = resourceActionCreators(baseUrl, 'blogs', { url: 'blogs' })
 
-    assert.deepEqual(Object.keys(subject), actions)
-    actions.forEach(action => assert.equal(typeof subject[action], 'function'))
+    assert.deepEqual(Object.keys($subject), actions)
+    actions.forEach(action => assert.equal(typeof $subject[action], 'function'))
   })
 })

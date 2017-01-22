@@ -1,3 +1,4 @@
+/* global $subject, $agent, $component, $resource, $client, $fetch */
 import assert from 'assert'
 import { mount } from 'enzyme'
 
@@ -14,46 +15,28 @@ import createClient from '../lib/createClient'
 import { nuke } from '../lib/actionCreators'
 
 describe('AlwaysComponent', () => {
-  let subject
-  let agent
-  let client
-  let resource
-
-  function render (props = {}) {
-    const AlwaysRendersComponent = alwaysComponent(resource)
-    subject = mount(withConnectContext(AlwaysRendersComponent, props)).find('AlwaysRendersComponent')
-  }
-
-  function fetch (data) {
-    return subject.prop('fetch')(data)
-  }
-
-  function createAgent () {
-    agent = request(app)
-  }
-
-  function nukeStore () {
-    store.dispatch(nuke())
-  }
+  subject(() => mount(withConnectContext($component)).find('AlwaysRendersComponent'))
+  def('component', () => alwaysComponent($resource))
+  def('client', () => createClient({ agent: $agent }))
+  def('agent', () => request(app))
+  def('fetch', () => $subject.prop('fetch'))
 
   beforeEach(() => {
-    createAgent()
-    nukeStore()
+    store.dispatch(nuke())
   })
 
-  it('should use default value before fetch', async function () {
-    const data = 'not fetched'
-    client = createClient({ agent })
-    resource = client('fortunecookie', { defaultPayload: { data } })
+  describe('with default payload', () => {
+    const NOT_FETCHED = 'not fetched'
+    def('resource', () => $client('fortunecookie', { defaultPayload: { data: NOT_FETCHED } }))
 
-    render()
+    it('should use default value before fetch', async function () {
+      // Before fetching, the default payload should be part of the state
+      assert.equal($subject.find('#root').text(), NOT_FETCHED)
 
-    // Before fetching, the default payload should be part of the state
-    assert.equal(subject.find('#root').text(), data)
+      await $fetch()
 
-    await fetch()
-
-    // After fetching, it should change to the fetched data
-    assert.equal(subject.find('#root').text(), FORTUNE)
+      // After fetching, it should change to the fetched data
+      assert.equal($subject.find('#root').text(), FORTUNE)
+    })
   })
 })

@@ -56,9 +56,11 @@
   "standard": {
     "globals": [
       "describe",
+      "def",
       "before",
       "beforeEach",
-      "it"
+      "it",
+      "subject"
     ]
   }
 }

@@ -1,3 +1,4 @@
+/* global $subject, $agent, $component, $map, $resource, $client, $fetch, $create, $prop */
 import assert from 'assert'
 import { mount } from 'enzyme'
 
@@ -17,35 +18,13 @@ import createClient from '../lib/createClient'
 import { nuke } from '../lib/actionCreators'
 
 describe('SimpleComponent', () => {
-  let subject
-  let agent
-  let client
-  let resource
-
-  function render (map) {
-    const SimpleComponent = simpleComponent(resource, map)
-    subject = mount(withConnectContext(SimpleComponent)).find('SimpleComponent')
-  }
-
-  function fetch (data) {
-    return subject.prop('fetch')(data)
-  }
-
-  function create (data) {
-    return subject.prop('create')(data)
-  }
-
-  function getResource (prop) {
-    return subject.prop('resource')
-  }
-
-  function createAgent () {
-    agent = request(app)
-  }
-
-  function nukeStore () {
-    store.dispatch(nuke())
-  }
+  subject(() => mount(withConnectContext($component)).find('SimpleComponent'))
+  def('component', () => simpleComponent($resource, $map))
+  def('client', () => createClient({ agent: $agent }))
+  def('agent', () => request(app))
+  def('fetch', () => $subject.prop('fetch'))
+  def('create', () => $subject.prop('create'))
+  def('prop', () => $subject.prop('resource'))
 
   function assertPromiseFailed (reason = "Expected promise to fail but it didn't") {
     // A normal throw would be silently caught by the try/catch block, so return the
@@ -54,107 +33,80 @@ describe('SimpleComponent', () => {
   }
 
   beforeEach(() => {
-    createAgent()
-    nukeStore()
+    store.dispatch(nuke())
   })
 
-  it('should build url with id', async function () {
-    client = createClient({ agent })
-    resource = client('todos', { urlRoot: 'todos' })
+  describe('rendering TODO item', () => {
+    def('resource', () => $client('todos', { urlRoot: 'todos' }))
+    def('map', () => payload => payload.data.title)
 
-    render(payload => payload.data.title)
+    it('should build url with id', async function () {
+      await $fetch({ id: 1 })
 
-    await fetch({ id: 1 })
+      assert($prop.payload.config.url.endsWith('/todos/1'))
+      assert.deepEqual($prop.payload.data, TODO_ITEM)
+    })
 
-    const todos = getResource()
-    assert(todos.payload.config.url.endsWith('/todos/1'))
-    assert.deepEqual(todos.payload.data, TODO_ITEM)
+    it('should build url with null id', async function () {
+      await $fetch({ id: null })
+
+      assert($prop.payload.config.url.endsWith('/todos'))
+    })
+
+    it('should not create undefined', async function () {
+      try {
+        await $create()
+        return assertPromiseFailed()
+      } catch (ex) {
+        assert.equal($prop.error.response.data, TITLE_REQUIRED)
+      }
+    })
+
+    it('should not create undefined', async function () {
+      try {
+        await $create()
+        return assertPromiseFailed()
+      } catch (ex) {
+        assert.equal($prop.error.response.data, TITLE_REQUIRED)
+      }
+    })
+
+    it('should create', async function () {
+      const title = 'add new item'
+      await $create({ title })
+
+      assert.equal($prop.payload.data.title, title)
+    })
   })
 
-  it('should build url with null id', async function () {
-    client = createClient({ agent })
-    resource = client('todos', { urlRoot: 'todos' })
+  describe('rendering admin', () => {
+    def('resource', () => $client('admin'))
+    def('map', () => ({data}) => data)
 
-    render(payload => payload.data.title)
+    it('should not authenticate', async function () {
+      try {
+        await $fetch()
+        return assertPromiseFailed()
+      } catch (ex) {
+        assert.equal($prop.error.response.data, UNAUTHORIZED)
+        assert.equal($subject.find('.error').text(), UNAUTHORIZED)
+      }
+    })
 
-    await fetch({ id: null })
+    describe('with auth token', () => {
+      function before (config) {
+        const headers = { ...config.headers, 'X-Auth-Token': 'TOKEN' }
+        return { ...config, headers }
+      }
 
-    const todos = getResource()
-    assert(todos.payload.config.url.endsWith('/todos'))
-  })
+      def('client', () => createClient({ agent: $agent, before }))
 
-  it('should not create undefined', async function () {
-    client = createClient({ agent })
-    resource = client('todos', { urlRoot: 'todos' })
+      it('should authenticate', async function () {
+        await $fetch()
 
-    render(payload => payload.data.title)
-
-    try {
-      await create()
-      return assertPromiseFailed()
-    } catch (ex) {
-      const todo = getResource()
-      assert.equal(todo.error.response.data, TITLE_REQUIRED)
-    }
-  })
-
-  it('should not create undefined', async function () {
-    client = createClient({ agent })
-    resource = client('todos', { urlRoot: 'todos' })
-
-    render(payload => payload.data.title)
-
-    try {
-      await create()
-      return assertPromiseFailed()
-    } catch (ex) {
-      const todo = getResource()
-      assert.equal(todo.error.response.data, TITLE_REQUIRED)
-    }
-  })
-
-  it('should create', async function () {
-    client = createClient({ agent })
-    resource = client('todos', { urlRoot: 'todos' })
-
-    render(payload => payload.data.title)
-
-    const title = 'add new item'
-    await create({ title })
-
-    const todo = getResource()
-    assert.equal(todo.payload.data.title, title)
-  })
-
-  it('should not authenticate', async function () {
-    client = createClient({ agent })
-    resource = client('admin')
-    render()
-
-    try {
-      await fetch()
-      return assertPromiseFailed()
-    } catch (ex) {
-      const admin = getResource()
-      assert.equal(admin.error.response.data, UNAUTHORIZED)
-      assert.equal(subject.find('.error').text(), UNAUTHORIZED)
-    }
-  })
-
-  it('should authenticate', async function () {
-    function before (config) {
-      const headers = { ...config.headers, 'X-Auth-Token': 'TOKEN' }
-      return { ...config, headers }
-    }
-
-    client = createClient({ agent, before })
-    resource = client('admin')
-    render()
-
-    await fetch()
-
-    const admin = getResource()
-    assert.equal(admin.payload.data, AUTHORIZED)
-    assert.equal(subject.find('#root').text(), AUTHORIZED)
+        assert.equal($prop.payload.data, AUTHORIZED)
+        assert.equal($subject.find('#root').text(), AUTHORIZED)
+      })
+    })
   })
 })
