@@ -18,7 +18,8 @@ export default function withResource (resource, map = (payload) => payload.data)
   function mapDispatchToProps (dispatch) {
     return bindActionCreators({
       fetch: resource.fetch,
-      create: resource.create
+      create: resource.create,
+      update: resource.update
     }, dispatch)
   }
 

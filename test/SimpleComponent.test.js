@@ -1,4 +1,4 @@
-/* global $subject, $agent, $component, $map, $resource, $client, $fetch, $create, $prop */
+/* global $subject, $agent, $component, $map, $resource, $client, $fetch, $create, $update, $prop */
 import assert from 'assert'
 import { mount } from 'enzyme'
 
@@ -11,7 +11,9 @@ import app, {
   UNAUTHORIZED,
   AUTHORIZED,
   TODO_ITEM,
-  TITLE_REQUIRED
+  TITLE_REQUIRED,
+  NOTIFICATION,
+  NOTIFICATION_MISSING
 } from './fixtures/app'
 
 import createClient from '../lib/createClient'
@@ -24,6 +26,7 @@ describe('SimpleComponent', () => {
   def('agent', () => request(app))
   def('fetch', () => $subject.prop('fetch'))
   def('create', () => $subject.prop('create'))
+  def('update', () => $subject.prop('update'))
   def('prop', () => $subject.prop('resource'))
 
   function assertPromiseFailed (reason = "Expected promise to fail but it didn't") {
@@ -106,6 +109,43 @@ describe('SimpleComponent', () => {
 
         assert.equal($prop.payload.data, AUTHORIZED)
         assert.equal($subject.find('#root').text(), AUTHORIZED)
+      })
+    })
+  })
+
+  describe('rendering notifications', () => {
+    def('resource', () => $client('notifications', { rootParam: false }))
+    def('map', () => ({data}) => data.message)
+
+    it('should not succeed', async function () {
+      try {
+        await $update(NOTIFICATION)
+        return assertPromiseFailed()
+      } catch (ex) {
+        assert.equal($prop.error.response.data, NOTIFICATION_MISSING)
+        assert.equal($subject.find('.error').text(), NOTIFICATION_MISSING)
+      }
+    })
+
+    describe('with rootParam', () => {
+      def('resource', () => $client('notifications', { rootParam: 'notification' }))
+
+      it('should succeed', async function () {
+        await $update(NOTIFICATION)
+
+        assert.deepEqual($prop.payload.data, NOTIFICATION)
+        assert.equal($subject.find('#root').text(), NOTIFICATION.message)
+      })
+    })
+
+    describe('with rootParam as true', () => {
+      def('resource', () => $client('notification', { url: 'notifications', rootParam: true }))
+
+      it('should succeed', async function () {
+        await $update(NOTIFICATION)
+
+        assert.deepEqual($prop.payload.data, NOTIFICATION)
+        assert.equal($subject.find('#root').text(), NOTIFICATION.message)
       })
     })
   })

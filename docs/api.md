@@ -48,6 +48,7 @@ A function to create a new Resource. Available options are:
 - `idAttribute : string` Defaults to "id" but you can change it if your resource has another identifier
 - `defaultPayload : any` Sets the payload for before the resource has received anything from the server. Otherwise the payload will be `undefined`
 - `transform : function(payload, previous, isFulfilled, meta) => nextPayload` When your resource is about to receive data, you may include a transform function to describe how you want to store that data. The default behavior is an identity function, whatever data gets received is what gets stored in the state.
+- `rootParam : bool or string` **true** will use the resource name as the root, a **string value** will be used as the root, any other value will be ignored
 
 #### Building URLs
 
@@ -191,6 +192,32 @@ function markDeleted (payload, previous, isFulfilled, meta) {
 }
 
 blogs = client('blogs', { transform: markDeleted })
+```
+
+#### `rootParam : bool or string`
+
+Pass `rootParam: true` to wrap the input data inside an object with the resource name as the label:
+
+```js
+const client = createClient('http://example.com')
+const users = client('users', { urlRoot: 'users.json', rootParam: true }
+
+// POST http://example.com/users.json
+//
+// { users: { first: 'John', last: 'Doe' } }
+store.dispatch(users.create({ first: 'John', last: 'Doe' }))
+```
+
+Otherwise pass a string as the label:
+
+```js
+const client = createClient('http://example.com')
+const users = client('users', { rootParam: 'user' }
+
+// POST http://example.com/users.json
+//
+// { user: { first: 'John', last: 'Doe' } }
+store.dispatch(users.create({ first: 'John', last: 'Doe' }))
 ```
 
 ### `resource` Action Creators

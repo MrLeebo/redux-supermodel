@@ -16,6 +16,9 @@ export const TODO_LIST = [
   { id: 4, title: 'Take nap' }
 ]
 
+export const NOTIFICATION = { id: 1, message: 'Your work will begin shortly.', user_id: 10 }
+export const NOTIFICATION_MISSING = 'Notification not found'
+
 export const FORTUNE = 'The early bird gets the worm but the second mouse gets the cheese'
 
 app.use(bodyParser.json())
@@ -51,6 +54,14 @@ app.use('/todos', (req, res) => {
 
 app.use('/fortunecookie', (req, res) => {
   res.status(200).send(FORTUNE)
+})
+
+app.put('/notifications', (req, res) => {
+  if (req.body.notification && req.body.notification.id) {
+    res.status(200).send(NOTIFICATION)
+  } else {
+    res.status(404).send(NOTIFICATION_MISSING)
+  }
 })
 
 app.use((req, res) => {
