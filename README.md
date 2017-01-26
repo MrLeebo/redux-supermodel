@@ -72,16 +72,10 @@ export default connect(mapStateToProps, mapDispatchToProps)(MyComponent)
 ## Installation
 
 ```
-npm install --save redux-supermodel
+npm install --save redux-supermodel redux-promise-middleware
 ```
 
 You will need to add the `redux-promise-middleware` middleware and the `redux-supermodel` reducer to your Redux Store.
-
-```
-npm install --save redux-promise-middleware
-```
-
-Add the `redux-promise-middleware` middleware and `redux-supermodel` reducers to your Redux Store:
 
 ```js
 // store.js
