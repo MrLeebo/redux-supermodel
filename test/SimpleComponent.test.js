@@ -149,4 +149,28 @@ describe('SimpleComponent', () => {
       })
     })
   })
+
+  describe('rendering resource with url function', () => {
+    def('resource', () => $client('todos', { url: ({data}) => `todos/${data.fizzbuzz}` }))
+    def('map', () => ({data}) => data.title)
+
+    it('should build url from function', async function () {
+      await $fetch({ fizzbuzz: 1 })
+
+      assert($prop.payload.config.url.endsWith('/todos/1'))
+      assert.deepEqual($prop.payload.data, TODO_ITEM)
+    })
+  })
+
+  describe('rendering resource with urlRoot function', () => {
+    def('resource', () => $client('todos', { urlRoot: () => ['t', 'o', 'd', 'o', 's'].join('') }))
+    def('map', () => ({data}) => data.title)
+
+    it('should build url from function', async function () {
+      await $fetch({ id: 1 })
+
+      assert($prop.payload.config.url.endsWith('/todos/1'))
+      assert.deepEqual($prop.payload.data, TODO_ITEM)
+    })
+  })
 })
