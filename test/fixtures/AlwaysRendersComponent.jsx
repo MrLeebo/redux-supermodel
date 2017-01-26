@@ -1,6 +1,7 @@
 import React from 'react'
 import { bindActionCreators } from 'redux'
 import { connect } from 'react-redux'
+import propType from '../../lib/propType'
 
 export default function withResource (resource) {
   function AlwaysRendersComponent ({ resource }) {
@@ -13,6 +14,10 @@ export default function withResource (resource) {
         <div id='root'>{payload.data || 'Unknown'}</div>
       </div>
     )
+  }
+
+  AlwaysRendersComponent.propTypes = {
+    resource: propType.isRequired
   }
 
   function mapStateToProps (state) {

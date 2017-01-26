@@ -2,6 +2,7 @@ import React from 'react'
 import { bindActionCreators } from 'redux'
 import { connect } from 'react-redux'
 import TodosTable from './TodosTable'
+import propType from '../../lib/propType'
 
 export default function withResource (resource) {
   class TodosComponent extends React.Component {
@@ -31,6 +32,10 @@ export default function withResource (resource) {
         </div>
       )
     }
+  }
+
+  TodosComponent.propTypes = {
+    resource: propType
   }
 
   function mapStateToProps (state) {

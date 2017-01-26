@@ -1,6 +1,7 @@
 /* global $subject */
 import assert from 'assert'
 import { resourceActionCreators } from '../lib/actionCreators'
+import propType from '../lib/propType'
 
 describe('actionCreators', () => {
   const baseUrl = 'http://localhost'
@@ -18,8 +19,10 @@ describe('actionCreators', () => {
 
   it('should generate action creators', () => {
     const actions = ['reset', 'fetch', 'create', 'update', 'destroy']
-
-    assert.deepEqual(Object.keys($subject), actions)
     actions.forEach(action => assert.equal(typeof $subject[action], 'function'))
+  })
+
+  it('should include propType', () => {
+    assert.equal($subject.propType, propType)
   })
 })

@@ -1,6 +1,7 @@
 import React from 'react'
 import { bindActionCreators } from 'redux'
 import { connect } from 'react-redux'
+import propType from '../../lib/propType'
 
 export default function withResource (resource, map = (payload) => payload.data) {
   function SimpleComponent ({ resource }) {
@@ -9,6 +10,10 @@ export default function withResource (resource, map = (payload) => payload.data)
     if (!ready) return <div>Please wait...</div>
     if (error) return <div className='error'>{error.response.data}</div>
     return <div id='root'>{map(payload)}</div>
+  }
+
+  SimpleComponent.propTypes = {
+    resource: propType
   }
 
   function mapStateToProps (state) {

@@ -219,6 +219,85 @@ const users = client('users', { rootParam: 'user' }
 // { user: { first: 'John', last: 'Doe' } }
 store.dispatch(users.create({ first: 'John', last: 'Doe' }))
 ```
+### Creating a Basic Component
+
+When rendering your resource state, be sure to check the `ready` and `error` states before attempting to use the `payload`.
+
+```js
+import React from 'react'
+import createClient from 'redux-supermodel'
+
+const client = createClient('http://example.com/api')
+const blogs = client('blogs')
+
+export default function MyComponent ({blogs, createBlog}) {
+  const { ready, error, payload } = blogs
+
+  if (!ready) return <div className="loading">Please wait...</div>
+  if (error) return <div className="error">{error.message}</div>
+
+  const rows = payload.data.map(blog => <tr><td>{blog.title}</td></tr>)
+  return (
+    <div>
+      <div>
+        <button onClick={() => createBlog({title: 'new blog'})}>
+          Create
+        </button>
+      </div>
+      <table>
+        <tbody>{rows}</tbody>
+      </table>
+    </div>
+  )
+}
+
+MyComponent.propTypes = {
+  blogs: blogs.propType.isRequired,
+  createBlog: React.PropTypes.func.isRequired
+}
+
+function mapStateToProps (state) {
+  return {
+    blogs: blogs(state)
+  }
+}
+
+function mapDispatchToProps (dispatch) {
+  return bindActionCreators({
+    createBlog: blogs.create,
+  }, dispatch)
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(MyComponent)
+```
+
+#### PropTypes
+
+You can use the `propType` provided by **redux-supermodel** to verify that the prop your component is receiving is what it is supposed to be. There are two ways to reference `propType` in your components:
+
+Via your resource definition object:
+
+```js
+const blogs = client('blogs')
+
+// ...
+
+MyComponent.propTypes = {
+  blogs: blogs.propType
+}
+```
+
+Or via an import if you don't have a reference to your resource in your component module:
+
+```js
+import { propType as resourcePropType } from 'redux-supermodel'
+
+// ...
+
+MyComponent.propTypes = {
+  blogs: resourcePropType
+}
+```
 
 ### `resource` Action Creators
 

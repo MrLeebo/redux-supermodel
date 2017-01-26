@@ -8,15 +8,14 @@ describe('mapResourceStateToProps', () => {
 
   it('should get prop', () => {
     const state = { initialized: true, payload: { pass: true } }
-    assert.deepEqual($result(state), {
-      initialized: true,
-      payload: { pass: true },
-      pendingCreate: false,
-      pendingDestroy: false,
-      pendingFetch: false,
-      pendingUpdate: false,
-      ready: true
-    })
+    const result = $result(state)
+    assert.equal(result.initialized, true)
+    assert.deepEqual(result.payload, { pass: true })
+    assert.equal(result.pendingCreate, false)
+    assert.equal(result.pendingDestroy, false)
+    assert.equal(result.pendingFetch, false)
+    assert.equal(result.pendingUpdate, false)
+    assert.equal(result.ready, true)
   })
 
   it('should set pendingFetch', () => {

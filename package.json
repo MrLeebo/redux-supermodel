@@ -1,6 +1,6 @@
 {
   "name": "redux-supermodel",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "A package of action creator functions and reducers that deal with the state management of REST-like APIs for you... all you need is a URL!",
   "repository": "https://github.com/MrLeebo/redux-supermodel",
   "main": "dist/index.js",

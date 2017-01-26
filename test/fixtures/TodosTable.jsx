@@ -1,4 +1,5 @@
 import React from 'react'
+import propType from '../../lib/propType'
 
 export default function TodosTable ({resource}) {
   const { ready, payload, error } = resource
@@ -19,4 +20,8 @@ export default function TodosTable ({resource}) {
       </tbody>
     </table>
   )
+}
+
+TodosTable.propTypes = {
+  resource: propType.isRequired
 }
