@@ -100,6 +100,33 @@ describe('reducer', () => {
 
       assert.deepEqual($subject(action), expected)
     })
+
+    it('should not have root param in transform arg', () => {
+      const expectedPayload = { id: 123 }
+      function transform (payload) {
+        assert.deepEqual(payload, expectedPayload)
+        return payload
+      }
+
+      const meta = { resourceName: 'blogs', definition: { url: 'blogs', rootParam: true, transform } }
+      const action = {
+        type: types.PENDING,
+        payload: expectedPayload,
+        meta
+      }
+
+      const expected = {
+        blogs: {
+          initialized: true,
+          busy: true,
+          payload: expectedPayload,
+          previous: undefined,
+          meta
+        }
+      }
+
+      assert.deepEqual($subject(action), expected)
+    })
   })
 
   describe('with pending state', () => {
