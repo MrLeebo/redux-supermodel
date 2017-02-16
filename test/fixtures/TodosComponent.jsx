@@ -34,8 +34,11 @@ export default function withResource (resource) {
     }
   }
 
+  const { func } = React.PropTypes
   TodosComponent.propTypes = {
-    resource: propType
+    resource: propType,
+    fetch: func.isRequired,
+    reset: func.isRequired
   }
 
   function mapStateToProps (state) {
