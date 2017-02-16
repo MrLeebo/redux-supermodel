@@ -200,7 +200,7 @@ Pass `rootParam: true` to wrap the input data inside an object with the resource
 
 ```js
 const client = createClient('http://example.com')
-const users = client('users', { urlRoot: 'users.json', rootParam: true }
+const users = client('users', { urlRoot: 'users.json', rootParam: true })
 
 // POST http://example.com/users.json
 //
@@ -212,13 +212,20 @@ Otherwise pass a string as the label:
 
 ```js
 const client = createClient('http://example.com')
-const users = client('users', { rootParam: 'user' }
+const users = client('users', { rootParam: 'user' })
 
 // POST http://example.com/users.json
 //
 // { user: { first: 'John', last: 'Doe' } }
 store.dispatch(users.create({ first: 'John', last: 'Doe' }))
 ```
+
+### [bindResource](docs/bindResource.md)
+
+You can use `bindResource` to automatically wire up all of the resource props as well as "fetch on mount" and "reset on unmount" behavior for a component. This is useful for page-level components that are associated to a particular resource.
+
+Please read [bindResource.md](docs/bindResource.md) for more details.
+
 ### Creating a Basic Component
 
 When rendering your resource state, be sure to check the `ready` and `error` states before attempting to use the `payload`.
@@ -234,7 +241,7 @@ export default function MyComponent ({blogs, createBlog}) {
   const { ready, error, payload } = blogs
 
   if (!ready) return <div className="loading">Please wait...</div>
-  if (error) return <div className="error">{error.message}</div>
+  if (error) return <div className="error">{error.response.data}</div>
 
   const rows = payload.data.map(blog => <tr><td>{blog.title}</td></tr>)
   return (

@@ -37,7 +37,7 @@ function MyComponent ({blogs, createBlog}) {
   const { ready, error, payload } = blogs
 
   if (!ready) return <div className="loading">Please wait...</div>
-  if (error) return <div className="error">{error.message}</div>
+  if (error) return <div className="error">{error.response.data}</div>
 
   const rows = payload.data.map(blog => <tr><td>{blog.title}</td></tr>)
   return (

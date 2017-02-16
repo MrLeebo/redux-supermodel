@@ -41,6 +41,7 @@
     "express": "^4.14.0",
     "jsdom": "^9.9.1",
     "mocha": "^3.2.0",
+    "mock-require": "^2.0.1",
     "nyc": "^10.0.0",
     "react": "^15.4.2",
     "react-addons-test-utils": "^15.4.2",

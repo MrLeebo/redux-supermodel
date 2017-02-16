@@ -21,6 +21,8 @@ export const NOTIFICATION_MISSING = 'Notification not found'
 
 export const FORTUNE = 'The early bird gets the worm but the second mouse gets the cheese'
 
+export const POST = { id: 1, title: 'Hello, world!', body: 'This is a post.' }
+
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 
@@ -62,6 +64,14 @@ app.put('/notifications', (req, res) => {
   } else {
     res.status(404).send(NOTIFICATION_MISSING)
   }
+})
+
+app.get('/posts/1', (req, res) => {
+  res.status(200).send(POST)
+})
+
+app.put('/posts/1', (req, res) => {
+  res.status(200).send(req.body)
 })
 
 app.use((req, res) => {
