@@ -69,6 +69,21 @@ function mapDispatchToProps (dispatch) {
 export default connect(mapStateToProps, mapDispatchToProps)(MyComponent)
 ```
 
+:new: **v0.10.0** introduces the `bindResource` higher-order component which will automatically fetch the resource when the component mounts, reset it when the component unmounts, and binds all of the resource's props and action creators to the component. 
+
+```js
+import { bindResource, createClient } from 'redux-supermodel'
+
+function MyComponent () { /* ... */ }
+
+const client = createClient('http://example.com/api')
+const blogs = client('blogs')
+
+export default bindResource({ blogs })(MyComponent)
+```
+
+See [bindResource](docs/bindResource.md) for more information.
+
 ## Installation
 
 ```
