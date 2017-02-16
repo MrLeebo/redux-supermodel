@@ -4,7 +4,7 @@ This helper will bind an object full of resource definitions to a component. On 
 
 When you write this:
 
-```
+```js
 const post = client('post' { urlRoot: 'posts' })
 export default bindResource({ post })(PostEditor)
 ```
@@ -21,7 +21,7 @@ The component `PostEditor` will receive all of these props:
 
 The `resources` param is just an object containing one or more resource definitions. To support multiple resources being bound to one component, the key name will be used in the prop names.
 
-```
+```js
 const users = client('users')
 const likes = client('likes')
 const topics = client('topics')
@@ -88,7 +88,7 @@ export default bindResource({ post })(PostEditor)
 
 You can change how the component will fetch the data using the `mount` option:
 
-```
+```js
 export default bindResource({ post }, { mount(props) {
     props.fetchPost({ id: props.id })
   }
