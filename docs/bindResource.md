@@ -16,6 +16,8 @@ The component `PostEditor` will receive all of these props:
 - `resetPost` The dispatch-bound reset action creator
 - `fetchAll` If the `resources` object had more than one resource, this will fetch all of them
 - `resetAll` Like `fetchAll`, this will reset all of the bound resources to their default value
+- `onMountError(err)` Callback function if there was a problem fetching the resources
+- `onUnmountError(err)` Callback function if there was a problem resetting the resources
 
 ### `resources : object`
 

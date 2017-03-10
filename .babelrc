@@ -1,10 +1,12 @@
 {
   "presets": [
-    "es2015-node5",
+    "es2015",
+    "stage-0",
     "react"
   ],
   "plugins": [
     "transform-async-to-generator",
-    "transform-object-rest-spread"
+    "transform-object-rest-spread",
+    "transform-regenerator"
   ]
 }

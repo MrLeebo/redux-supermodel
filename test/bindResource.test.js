@@ -1,4 +1,4 @@
-/* global $subject, $agent, $options, $client, $resource, $mount, $a, $b */
+/* global $subject, $agent, $options, $client, $resource, $onMountError $mount, $a, $b */
 /* eslint-env mocha */
 import React from 'react'
 import assert from 'assert'
@@ -20,13 +20,14 @@ function MyComponent (props) {
 describe('bindResource', () => {
   subject(() => (resources, options = $options) => {
     const Component = bindResource(resources, options)(MyComponent)
-    return mount(<Component store={store} />)
+    return mount(<Component store={store} onMountError={$onMountError} />)
   })
 
   def('options', () => ({}))
   def('agent', () => request(app))
   def('client', () => createClient({ agent: $agent }))
   def('resource', () => $client('blogs'))
+  def('onMountError', spy)
 
   describe('mounted component', () => {
     subject(() => $subject({ resource: $resource }))
@@ -55,6 +56,18 @@ describe('bindResource', () => {
         assert($subject)
         assert($mount.calledOnce)
         assert(fetch.notCalled)
+      })
+
+      describe('with mount rejected promise', () => {
+        def('mount', () => () => Promise.reject('rejected'))
+
+        it('should catch on mount', () => {
+          assert($subject)
+          return $mount().then(
+            () => assert.fail(null, null, 'Expected rejected promise'),
+            () => assert($onMountError.calledOnce)
+          )
+        })
       })
     })
   })
