@@ -59,7 +59,7 @@ describe('bindResource', () => {
       })
 
       describe('with mount rejected promise', () => {
-        def('mount', () => () => Promise.reject('rejected'))
+        def('mount', () => () => Promise.reject(new Error('rejected')))
 
         it('should catch on mount', () => {
           assert($subject)

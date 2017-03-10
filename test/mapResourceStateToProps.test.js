@@ -44,7 +44,7 @@ describe('mapResourceStateToProps', () => {
   })
 
   describe('with default payload', () => {
-    const defaultPayload = Symbol()
+    const defaultPayload = Symbol('fizzbuzz')
     subject(() => withDefinition('test', { defaultPayload }))
 
     it('should set payload to default for no state', () => {

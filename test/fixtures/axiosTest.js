@@ -11,7 +11,7 @@ export default function axiosTest (app) {
     app = http.createServer(app)
   }
 
-  const server = app.address && app.address() && app || app.listen(0)
+  const server = (app.address && app.address() && app) || app.listen(0)
   const port = server.address().port
   const host = `http://127.0.0.1:${port}/`
 
