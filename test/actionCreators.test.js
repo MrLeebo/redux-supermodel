@@ -1,4 +1,4 @@
-/* global $subject, $agent */
+/* global $subject, $agent, $blogs */
 import assert from 'assert'
 
 import request from './fixtures/axiosTest'
@@ -10,8 +10,13 @@ import propType from '../lib/propType'
 describe('actionCreators', () => {
   const baseUrl = '/'
 
-  def('subject', () => resourceActionCreators(baseUrl, 'blogs', { urlRoot: 'blogs' }, { agent: $agent }))
+  subject(() => resourceActionCreators(baseUrl, 'blogs', $blogs, { agent: $agent }))
   def('agent', () => request(app))
+  def('blogs', () => ({ urlRoot: 'blogs' }))
+
+  function assertPath (result, expected) {
+    assert.equal(result.request._options.path, expected)
+  }
 
   it('should require resource', () => {
     assert.throws(resourceActionCreators, 'Resource definition required')
@@ -32,15 +37,29 @@ describe('actionCreators', () => {
   })
 
   describe('ajaxActionCreator', () => {
+    it('should build simple url', async function () {
+      const result = await $subject.fetch().payload
+      assertPath(result, '/blogs')
+    })
+
     it('should include params in url for GET', async function () {
       const result = await $subject.fetch({ fizz: 'buzz' }).payload
-      assert.equal(result.request._options.path, '/blogs?fizz=buzz')
+      assertPath(result, '/blogs?fizz=buzz')
     })
 
     it('should not include id attribute in params', async function () {
       const result = await $subject.fetch({ id: 'my-first-blog', sort: 'popular' }).payload
-      assert.equal(result.request._options.path, '/blogs/my-first-blog?sort=popular')
+      assertPath(result, '/blogs/my-first-blog?sort=popular')
       assert.deepEqual(result.data, { id: 'my-first-blog' })
+    })
+
+    describe('with root param', () => {
+      def('blogs', () => ({ url: 'blogs', rootParam: true }))
+
+      it('should ignore root param', async function () {
+        const result = await $subject.fetch({ sort: 'popular' }).payload
+        assertPath(result, '/blogs?sort=popular')
+      })
     })
   })
 })
