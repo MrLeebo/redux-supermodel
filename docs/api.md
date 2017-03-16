@@ -66,6 +66,14 @@ You can customize a resource's URL using the "url" option
 blogs = client('blogs', { url: 'blogs.json' })
 ```
 
+When you `fetch` and pass in a parameter object, its values will be serialized into the URL.
+
+```js
+// https://example.com/api/v1/blogs?filter=recent
+blogs = client('blogs')
+blogs.fetch({ filter: 'recent' })
+```
+
 If you use "urlRoot" instead of "url", it will append the "id" to the end of the url if it is part of the request data
 
 ```js
@@ -77,10 +85,12 @@ blogs.fetch({ id: 'my-first-blog' })
 Lastly, we can redefine the "idAttribute" if our resource uses something other than "id" as the primary key
 
 ```js
-// https://example.com/api/v1/blogs/my-first-blog
+// https://example.com/api/v1/blogs/my-first-blog?sort_by=popularity
 blogs = client('blogs', { urlRoot: 'blogs', idAttribute: 'slug' })
-blogs.fetch({ slug: 'my-first-blog' })
+blogs.fetch({ slug: 'my-first-blog', sort_by: 'popularity' })
 ```
+
+Non-fetch actions will serialize their parameters to the request body, not the query string. If you need to customize the URL, you can define `url` or `urlRoot` as a function.
 
 #### `resource(state, options) => object` State To Props Function
 

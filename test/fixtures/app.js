@@ -8,6 +8,10 @@ export const UNAUTHORIZED = 'Unauthorized'
 export const AUTHORIZED = 'You seem cool'
 export const TITLE_REQUIRED = 'title required'
 
+export const BLOGS = [
+  { id: 1, title: 'My first blog', body: 'Hello, world!' }
+]
+
 export const TODO_ITEM = { id: 1, title: 'Get milk' }
 export const TODO_LIST = [
   { id: 1, title: 'Get milk' },
@@ -25,6 +29,14 @@ export const POST = { id: 1, title: 'Hello, world!', body: 'This is a post.' }
 
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
+
+app.get('/blogs', (req, res) => {
+  res.status(200).send(BLOGS)
+})
+
+app.get('/blogs/:id', (req, res) => {
+  res.status(200).send({ id: req.params.id })
+})
 
 app.use('/admin', (req, res) => {
   if (req.get('X-Auth-Token') !== 'TOKEN') {
