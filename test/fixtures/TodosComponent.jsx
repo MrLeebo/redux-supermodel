@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import { bindActionCreators } from 'redux'
 import { connect } from 'react-redux'
 import TodosTable from './TodosTable'
@@ -34,11 +35,10 @@ export default function withResource (resource) {
     }
   }
 
-  const { func } = React.PropTypes
   TodosComponent.propTypes = {
     resource: propType,
-    fetch: func.isRequired,
-    reset: func.isRequired
+    fetch: PropTypes.func.isRequired,
+    reset: PropTypes.func.isRequired
   }
 
   function mapStateToProps (state) {

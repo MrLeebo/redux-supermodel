@@ -15,7 +15,7 @@ describe('actionCreators', () => {
   def('blogs', () => ({ urlRoot: 'blogs' }))
 
   function assertPath (result, expected) {
-    assert.equal(result.request._options.path, expected)
+    assert.equal(result.request.path, expected)
   }
 
   it('should require resource', () => {

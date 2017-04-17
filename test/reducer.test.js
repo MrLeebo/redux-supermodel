@@ -101,6 +101,38 @@ describe('reducer', () => {
       assert.deepEqual($subject(action), expected)
     })
 
+    it('should apply transforms in order', () => {
+      const meta = {
+        resourceName: 'blogs',
+        definition: {
+          url: 'num',
+          transform: [
+            x => x + 1,
+            x => x * 2,
+            x => x ** 2
+          ]
+        }
+      }
+
+      const action = {
+        type: types.PENDING,
+        payload: 1,
+        meta
+      }
+
+      const expected = {
+        blogs: {
+          initialized: true,
+          busy: true,
+          payload: 16,
+          previous: undefined,
+          meta
+        }
+      }
+
+      assert.deepEqual($subject(action), expected)
+    })
+
     it('should not have root param in transform arg', () => {
       const expectedPayload = { id: 123 }
       function transform (payload) {
@@ -170,6 +202,38 @@ describe('reducer', () => {
         error: 'something broke',
         meta
       }
+      }
+
+      assert.deepEqual($subject(action), expected)
+    })
+
+    it('should apply transforms in order', () => {
+      const meta = {
+        resourceName: 'blogs',
+        definition: {
+          url: 'num',
+          transform: [
+            x => x + 1,
+            x => x * 2,
+            x => x ** 2
+          ]
+        }
+      }
+
+      const action = {
+        type: types.FULFILLED,
+        payload: 1,
+        meta
+      }
+
+      const expected = {
+        blogs: {
+          initialized: true,
+          busy: false,
+          payload: 16,
+          previous: undefined,
+          meta
+        }
       }
 
       assert.deepEqual($subject(action), expected)

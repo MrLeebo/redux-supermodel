@@ -243,6 +243,7 @@ When rendering your resource state, be sure to check the `ready` and `error` sta
 ```js
 import React from 'react'
 import createClient from 'redux-supermodel'
+import PropTypes from 'prop-types'
 
 const client = createClient('http://example.com/api')
 const blogs = client('blogs')
@@ -270,7 +271,7 @@ export default function MyComponent ({blogs, createBlog}) {
 
 MyComponent.propTypes = {
   blogs: blogs.propType.isRequired,
-  createBlog: React.PropTypes.func.isRequired
+  createBlog: PropTypes.func.isRequired
 }
 
 function mapStateToProps (state) {
