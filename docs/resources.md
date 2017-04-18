@@ -49,7 +49,7 @@ The rest of this document is going to go into more detail about how resources wo
 
 You can implement optimistic updates by defining `transform` as an identity function `{ transform: state => state }`.
 
-## Properties of a Resource
+## Resource Redux Selector
 
 When you create a resource using the client function, you will receive a function that acts as a redux state selector, 
 transforming your redux state into props that you can use to render your resource from your React components. 
@@ -65,16 +65,34 @@ export function mapStateToProps(state) {
 export default connect(mapStateToProps)(MyComponent)
 ```
 
+### Selector Parameters `resource(state, options)`
+
+When you use a resource as a selector for your redux state (as shown above), here are the accepted parameters:
+
+|name|type|required?|description|
+|:---|:---:|:---:|:---|
+|state|object|:white_check_mark:|The redux state, as received from connectors like `mapStateToProps`.|
+|options|object|:x:|See below.|
+
+##### Selector Options
+
+|option|type|default|description|
+|:---|:---:|:---:|:---|
+|mountedAt|string|`'resource'`|This is the key which you bound the *redux-supermodel* reducer to in your redux store. I recommend to use the default, but if you changed it to something else, be sure to specify the new name here.|
+
+### Properties of a Resource
+
 When you map the resource to props in this way, these are the properties you will receive:
 
 |prop|type|description|
 |:---|:---:|:---|
 |initialized|bool|**True** if any data has been fetched for this resource, **false** otherwise.|
 |busy|bool|**True** if a request is currently pending, **false** otherwise.|
-|payload|payload object|The resource response data, usually an *axios* response object.|
+|payload|payload object|The resource response data, usually an *axios* [response](https://github.com/mzabriskie/axios#response-schema).|
 |previous|payload object|While a request is pending, the previous payload gets copied here. If the request fails, the previous payload replaces the failed payload.|
 |meta|meta object|Contains miscellaneous metadata about the resource definition and the last request that was sent.|
 |ready|bool|**True** if the resource is initialized and is not busy, **false** otherwise.|
+|error|object|This is an Axios error object, see [Handling Errors](https://github.com/mzabriskie/axios#handling-errors).|
 |pendingFetch|bool|**True** if the current request is a fetch, **false** otherwise.|
 |pendingCreate|bool|**True** if the current request is a create, **false** otherwise.|
 |pendingUpdate|bool|**True** if the current request is an update, **false** otherwise.|
