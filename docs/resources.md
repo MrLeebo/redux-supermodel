@@ -32,7 +32,7 @@ The rest of this document is going to go into more detail about how resources wo
 |url|string or function|resource name|This gets appended to the end of the `client` URL|
 |urlRoot|string or function|`null`|Like url, however if the request data contains an `id` it will be appended to the URL as well|
 |idAttribute|string|`'id'`|In case your resource uses a different key, use this option to change it|
-|rootParam|boolean or string|`false`|`true` will use the resource name as the root, a string value will be used as the root, any other value will be ignored|
+|rootParam|boolean or string|`false`|`true` will use the resource name as the root, a string value will be used as the root, any other value will be ignored. See below.|
 |defaultPayload|any|`undefined`|The value of the resource's payload before it has been updated by making a request.|
 |transform|function or function[]|(state, previousState, isFulfilled, meta) => isFulfilled ? state : previousState|An optional transform function to map the API data before saving it to the redux store. If an array of transform functions are provided, the output state of each will be used as the input state of the next.|
 
@@ -45,9 +45,78 @@ The rest of this document is going to go into more detail about how resources wo
 |isFulfilled|bool|**True** if this state is coming from an AJAX response, **false** otherwise.|
 |meta|meta object|Contains miscellaneous details about the input request, resource definition, and action creator. May change over time.|
 
+##### rootParam
+
+Pass `rootParam: true` to wrap the input data inside an object with the resource name as the label:
+
+```js
+const client = createClient('http://example.com')
+const users = client('users', { urlRoot: 'users.json', rootParam: true })
+
+// POST http://example.com/users.json
+//
+// { users: { first: 'John', last: 'Doe' } }
+store.dispatch(users.create({ first: 'John', last: 'Doe' }))
+```
+
+Otherwise pass a string as the label:
+
+```js
+const client = createClient('http://example.com')
+const users = client('users', { rootParam: 'user' })
+
+// POST http://example.com/users.json
+//
+// { user: { first: 'John', last: 'Doe' } }
+store.dispatch(users.create({ first: 'John', last: 'Doe' }))
+```
+
 ##### Optimistic Updates
 
-You can implement optimistic updates by defining `transform` as an identity function `{ transform: state => state }`.
+When an AJAX request is dispatched, the current payload of the resource does not change until the server responds. For some applications, such as form-bound models, you may want to update the payload optimistically with the request data before the server response has been fulfilled. You can implement optimistic updates by defining the transform function as a simple identity function:
+
+```js
+const optimisticUpdates = state => state
+blogs = client('todos', { transform: optimisticUpdates })
+```
+
+##### Deleting an item from an index by marking it
+
+Many REST-like endpoints will respond to a DELETE action with a `204 No Content` response, but you probably don't want to replace your resource payload with no content. One thing you can do is modify your resource payload in redux with a `deleted: true` value instead of removing it entirely. You can use a transform function to do that.
+
+```js
+function markDeleted (payload, previous, isFulfilled, meta) {
+  // Unless you want to use Optimistic Updates, keep the previous
+  // payload until the request is fulfilled.
+  if (!isFulfilled) return previous
+
+  // Instead of deleting the resource payload from our Redux store
+  // outright, copy the previous payload and add the "deleted" flag
+  // so it can be displayed as such in the UI (e.g. with a
+  // strikethrough or something)
+  if (meta.action == 'destroy') {
+    const { id } = payload
+    let { data } = previous
+    const index = data && data.findIndex(x => x.id === id)
+
+    if (index >= 0) {
+      // Make a copy of the array because we don't want to modify
+      // the existing reference
+      data = data.slice(0)
+
+      data[index] = { ...data[index], deleted: true }
+      return { ...previous, data }
+    }
+
+    return previous
+  }
+
+  // For all other cases, take the new payload
+  return payload
+}
+
+blogs = client('blogs', { transform: markDeleted })
+```
 
 ## Resource Redux Selector
 
