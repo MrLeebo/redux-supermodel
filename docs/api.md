@@ -52,56 +52,55 @@ When rendering your resource state, be sure to check the `ready` and `error` sta
 
 ```js
 import React from 'react'
-import createClient from 'redux-supermodel'
 import PropTypes from 'prop-types'
+import { bindResource, createClient } from 'redux-supermodel'
 
-const client = createClient('http://example.com/api')
-const blogs = client('blogs')
+const client = createClient('http://jsonplaceholder.typicode.com')
+const todos = client.createCollection('todos', { urlRoot: 'todos' })
 
-export default function MyComponent ({blogs, createBlog}) {
-  const { ready, error, payload } = blogs
-
+export default function TodoList ({createTodos, ready, error, rows}) {
   if (!ready) return <div className="loading">Please wait...</div>
   if (error) return <div className="error">{error.response.data}</div>
 
-  const rows = payload.data.map(blog => <tr><td>{blog.title}</td></tr>)
   return (
     <div>
       <div>
-        <button onClick={() => createBlog({title: 'new blog'})}>
+        <button type="button" onClick={() => createTodos({title: 'new item'})}>
           Create
         </button>
       </div>
       <table>
-        <tbody>{rows}</tbody>
+        <tbody>{rows.map(todo => <tr key={row.id}><td>{row.title}</td></tr>)}</tbody>
       </table>
     </div>
   )
 }
 
-MyComponent.propTypes = {
-  blogs: blogs.propType.isRequired,
-  createBlog: PropTypes.func.isRequired
+TodoList.propTypes = {
+  createTodos: PropTypes.func,
+  ready: PropTypes.bool,
+  error: PropTypes.object,
+  rows: PropTypes.array
 }
 
-function mapStateToProps (state) {
+export function mergeProps (stateProps, dispatchProps, ownProps) {
+  const { ready, error, payload } = stateProps.todos
+  
   return {
-    blogs: blogs(state)
+    ...ownProps,
+    ...dispatchProps,
+    ready,
+    error,
+    rows: payload && payload.data
   }
 }
 
-function mapDispatchToProps (dispatch) {
-  return bindActionCreators({
-    createBlog: blogs.create,
-  }, dispatch)
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(MyComponent)
+export default bindResource({ todos }, { mergeProps })(TodoList)
 ```
 
 #### PropTypes
 
-You can use the `propType` provided by **redux-supermodel** to verify that the prop your component is receiving is what it is supposed to be. There are two ways to reference `propType` in your components:
+If you pass your resource props directly to your component without transforming it first, you can use the `propType` provided by **redux-supermodel** to verify that the prop your component is receiving is what it is supposed to be. There are two ways to reference `propType` in your components:
 
 Via your resource definition object:
 
