@@ -1,6 +1,6 @@
 ## resources
 
-A resource represents an endpoint from your API. You can create resources by calling the `client` you got from [createClient](docs/createClient.md) as a function. 
+A resource represents an endpoint from your API. You can create resources by calling the `client` you got from [createClient](createClient.md) as a function. 
 
 ```js
 import { createClient } from 'redux-supermodel'
@@ -14,7 +14,7 @@ export const todos = client('todos')
 export const posts = client('posts', { url: 'posts.json' })
 ```
 
-The rest of this document is going to go into more detail about how resources work, but if you're just browsing, you can skip all of the boring details and go directly to [bindResource](docs/bindResource.md) which will show you how to connect your new resource to your React components!
+The rest of this document is going to go into more detail about how resources work, but if you're just browsing, you can skip all of the boring details and go directly to [bindResource](bindResource.md) which will show you how to connect your new resource to your React components!
 
 ## `client(name, options)`
 
@@ -184,4 +184,4 @@ export default connect(mapStateToProps, mapDispatchToProps)(TodoList)
 
 All of this put together will give you a TodoList component (defined elsewhere) that has several props (defined below) to render the state of the `todos` resource and two callback props `fetchList()` and `createNew()` which will execute the AJAX requests and update the state of the resource with the results.
 
-This is a more in-depth picture of how resources work in redux, but you usually won't need to write up all of this code yourself. The [bindResource](docs/bindResource.md) higher-order component is here to help!
+This is a more in-depth picture of how resources work in redux, but you usually won't need to write up all of this code yourself. The [bindResource](bindResource.md) higher-order component is here to help!
