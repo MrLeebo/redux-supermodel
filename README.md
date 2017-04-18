@@ -28,61 +28,84 @@ const blogs = client('blogs')
 const comments = client('comments')
 ```
 
-## Connecting your Resource to your Component with Redux
+## Attaching your Resource's props to your Component
 
-Now that we have our ingredients, time to put everything together. We are going to use `mapDispatchToProps` and `bindActionCreators` to bind our action creators to the component and `mapStateToProps` to display the results.
+Start with your resource definition, let's pretend `http://example.com/api/posts/latest` will return a JSON object with properties `title` and `body`.
 
 ```js
-function MyComponent ({blogs, createBlog}) {
-  const { ready, error, payload } = blogs
+// resources.js
 
-  if (!ready) return <div className="loading">Please wait...</div>
-  if (error) return <div className="error">{error.response.data}</div>
+import { createClient } from 'redux-supermodel'
 
-  const rows = payload.data.map(blog => <tr><td>{blog.title}</td></tr>)
+const client = createClient('http://example.com/api')
+
+// GET http://example.com/api/posts/latest
+//
+// { title: 'My latest blog post', body: 'Hello, world!' }
+export const post = client('post', { url: 'posts/latest' }) 
+```
+
+The easiest way to use **redux-supermodel** is with the [bindResource](docs/bindResource.md) higher-order component which will automatically fetch the resource when the component mounts, reset it when the component unmounts, and binds the resource's props and action creators to the component's props. 
+
+```js
+// MyComponent.js
+
+import React from 'react'
+import { bindResource } from 'redux-supermodel'
+import { post } from './resources'
+
+function MyComponent ({ready, error, title, body, fetchPost}) {
+  if (!ready) return <div className="loading">Loading...</div> 
+  if (error) return <div className="error">{error}</div>
+
   return (
     <div>
-      <div>
-        <button onClick={() => createBlog({title: 'new blog'})}>
-          Create
-        </button>
+      <h1>{title}</h1>
+      <div className="body">
+        {body}
       </div>
-      <table>
-        <tbody>{rows}</tbody>
-      </table>
+      <button type="button" onClick={() => fetchPost()}>Refresh</button>
     </div>
   )
 }
 
-function mapStateToProps (state) {
-  return {
-    blogs: blogs(state)
+export function mergeProps (stateProps, dispatchProps, ownProps) {
+  const { 
+    ready, 
+    error, 
+    payload
+  } = stateProps.post
+
+  const err = error && error.response && error.response.data
+  const data = payload && payload.data
+
+  // The stateProps parameter can get rather large and have lots of unwieldy data structures,
+  // use mergeProps as an opportunity to be a bit selective and only return the stateProps
+  // values that you are going to use in your component.
+  //
+  // The same advice also applies to dispatchProps and ownProps, to a lesser extent, its not as
+  // important to do so in those cases because A) you will already be defining ownProps 
+  // somewhere else in your app and B) the `bindResource` higher-order component will dispatch
+  // some callbacks on your behalf (by default `fetchAll()` on mount and `resetAll()` on unmount)
+  return { 
+    ...ownProps, 
+    ...dispatchProps, 
+    ready, 
+    error: err && err.message, 
+    title: data && data.title, 
+    body: data && data.body 
   }
 }
 
-function mapDispatchToProps (dispatch) {
-  return bindActionCreators({
-    createBlog: blogs.create,
-  }, dispatch)
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(MyComponent)
+const resources = { post }
+export default bindResource(resources, { mergeProps })(MyComponent)
 ```
 
-:new: **v0.10.0** introduces the `bindResource` higher-order component which will automatically fetch the resource when the component mounts, reset it when the component unmounts, and binds all of the resource's props and action creators to the component. 
+The advice offered by this [blog post](https://goshakkk.name/redux-antipattern-mapstatetoprops/) is about mapStateToProps, but it applies to how we are using mergeProps here.
 
-```js
-import { bindResource, createClient } from 'redux-supermodel'
+For details on mergeProps, read the [react-redux connect()](https://github.com/reactjs/react-redux/blob/master/docs/api.md#connectmapstatetoprops-mapdispatchtoprops-mergeprops-options) documentation.
 
-function MyComponent () { /* ... */ }
-
-const client = createClient('http://example.com/api')
-const blogs = client('blogs')
-
-export default bindResource({ blogs })(MyComponent)
-```
-
-See [bindResource](docs/bindResource.md) for more information.
+For the full list of options, see [bindResource](docs/bindResource.md).
 
 ## Installation
 
