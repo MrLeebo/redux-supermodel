@@ -40,4 +40,34 @@ function basicAuthentication(config) {
 const client = createClient('https://example.com/api/v1', { before: basicAuthentication })
 ```
 
+#### Authentication
+
+Using the `before` function, you can set authentication information that applies to all of the resource calls for a particular client. In this example, we'll assume you already have a Redux store that can be imported from **store.js**.
+
+Basic authentication:
+
+```js
+import { createClient } from 'redux-supermodel'
+import { getState } from './store'
+
+function basicAuthentication (config) {
+  const { username, password } = getState().currentUser
+  return { ...config, auth: { username, password } }
+}
+
+export default createClient('https://example.com/api/v1', { before: basicAuthentication })
+```
+
+Or using an authentication token:
+
+```js
+function tokenAuthentication (config) {
+  const { token } = getState().currentUser
+  const headers = { ...config.headers, 'X-Auth-Token': token }
+  return { ...config, headers }
+}
+
+export default createClient('https://example.com/api/v1', { before: tokenAuthentication })
+```
+
 Next, we'll look at how to use your `client` to create [resources](resources.md).
