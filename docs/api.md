@@ -70,7 +70,7 @@ export default function TodoList ({createTodos, ready, error, rows}) {
         </button>
       </div>
       <table>
-        <tbody>{rows.map(todo => <tr key={row.id}><td>{row.title}</td></tr>)}</tbody>
+        <tbody>{rows && rows.map(todo => <tr key={row.id}><td>{row.title}</td></tr>)}</tbody>
       </table>
     </div>
   )
