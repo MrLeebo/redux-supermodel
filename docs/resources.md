@@ -33,6 +33,20 @@ The rest of this document is going to go into more detail about how resources wo
 |urlRoot|string or function|`null`|Like url, however if the request data contains an `id` it will be appended to the URL as well|
 |idAttribute|string|`'id'`|In case your resource uses a different key, use this option to change it|
 |rootParam|boolean or string|`false`|`true` will use the resource name as the root, a string value will be used as the root, any other value will be ignored|
+|defaultPayload|any|`undefined`|The value of the resource's payload before it has been updated by making a request.|
+|transform|function or function[]|(state, previousState, isFulfilled, meta) => isFulfilled ? state : previousState|An optional transform function to map the API data before saving it to the redux store.|
+
+#### transform(state, previousState, isFulfilled, meta) => newState
+
+|props|type|description|
+|state|object|The new state, depending on **isFulfilled** this will either be the input data from the request, or the response data.|
+|previousState|object|The current state before any changes have been made.|
+|isFulfilled|bool|**True** if this state is coming from an AJAX response, **false** otherwise.|
+|meta|meta object|Contains miscellaneous details about the input request, resource definition, and action creator. May change over time.|
+
+##### Optimistic Updates
+
+You can implement optimistic updates by defining `transform` as an identity function `{ transform: state => state }`.
 
 ## Properties of a Resource
 
