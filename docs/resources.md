@@ -39,6 +39,7 @@ The rest of this document is going to go into more detail about how resources wo
 #### transform(state, previousState, isFulfilled, meta) => newState
 
 |props|type|description|
+|:---|:---:|:---|
 |state|object|The new state, depending on **isFulfilled** this will either be the input data from the request, or the response data.|
 |previousState|object|The current state before any changes have been made.|
 |isFulfilled|bool|**True** if this state is coming from an AJAX response, **false** otherwise.|
