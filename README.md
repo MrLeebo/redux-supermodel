@@ -4,6 +4,8 @@
 
 Streamline the effort it takes for you to communicate between your [Redux](http://redux.js.org/) Store and a REST-like API. This is a package of action creator functions and reducers built with [axios](https://github.com/mzabriskie/axios) and [redux-promise-middleware](https://github.com/pburtchaell/redux-promise-middleware) that handle the resource state management for you... all you need is a URL!
 
+#### [Check out the demo](https://mrleebo.github.io/redux-supermodel)
+
 ## [API Reference](docs/api.md)
 
 ## Creating the Client
