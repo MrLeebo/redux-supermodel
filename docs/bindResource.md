@@ -1,4 +1,4 @@
-## `bindResource(resources, options={})(WrappedComponent)`
+## bindResource
 
 This helper will bind an object full of resource definitions to a component. On mount, each resource will be fetched and on unmount each resource will be reset. In addition, the resource's state selector and dispatch action creators will be appended to the component's props.
 
@@ -11,17 +11,32 @@ export default bindResource({ post })(PostEditor)
 
 The component `PostEditor` will receive all of these props:
 
-- `post : { ready, error, payload }` The state selector value for the post resource
-- `fetchPost`, `createPost`, `updatePost`, `destroyPost` The AJAX dispatch-bound action creators
-- `resetPost` The dispatch-bound reset action creator
-- `fetchAll` If the `resources` object had more than one resource, this will fetch all of them
-- `resetAll` Like `fetchAll`, this will reset all of the bound resources to their default value
-- `onMountError(err)` Callback function if there was a problem fetching the resources
-- `onUnmountError(err)` Callback function if there was a problem resetting the resources
+|prop|type|description|
+|:---|:---|:---|
+|post|[resource props](https://github.com/MrLeebo/redux-supermodel/blob/master/docs/resources.md#properties-of-a-resource)|The redux selector props for the post resource.|
+|fetchPost|AJAX dispatch-bound action creator function|Invoke to fetch the post.|
+|createPost|AJAX dispatch-bound action creator function|Invoke to create the post.|
+|updatePost|AJAX dispatch-bound action creator function|Invoke to update the post.|
+|destroyPost|AJAX dispatch-bound action creator function|Invoke to destroy the post.|
+|fetchAll|function|In this example there is only one resource being bound (post), but if you had multiples then this callback would fetch all of them. This callback is used by *bindResource* when the component mounts.|
+|resetAll|function|Like `fetchAll`, this will reset all of the resources bound to the component, and it is called automatically on unmount.|
 
-### `resources : object`
+## `bindResource(resources, options)(WrappedComponent)`
 
-The `resources` param is just an object containing one or more resource definitions. To support multiple resources being bound to one component, the key name will be used in the prop names.
+### Parameters
+
+|parameter|type|required?|description|
+|:---|:---:|:---:|:---|
+|resources|object|:white_check_mark:|An object containing one or more resource definitions. The key name is appended to the prop names so that multiple resources can be bound without their props colliding.|
+|options|object|:x:|See below.|
+
+### Options
+
+|option|type|default|description|
+|:---|:---:|:---:|:---|
+|mount|function|<code>props&nbsp;=>&nbsp;props.fetchAll()</code>||
+|mergeProps|function|<code>(stateProps,&nbsp;dispatchProps,&nbsp;ownProps)&nbsp;=> ({&nbsp;...ownProps,&nbsp;...dispatchProps,&nbsp;...stateProps&nbsp;}))</code>|Function where you can cherry pick props to pass to your component, calculate new computed props based on your resource state, and map/reduce your data to be ready for consumption by your Component.|
+|connectOptions|object|`{withRef:true}`|Passed as the 4th parameter to the `connect()` function. See the [docs](https://github.com/reactjs/react-redux/blob/master/docs/api.md#connectmapstatetoprops-mapdispatchtoprops-mergeprops-options) for more information.|
 
 ```js
 const users = client('users')
@@ -47,10 +62,6 @@ bindResource({
 // ... and so on.
 ```
 
-### `options : object`
-
-- `mount(props)` By default `bindResource` will fetch all of the resources, passing the component's props as the parameters. You can override that default with the mount function. See the examples below for details.
-
 ### Example `<PostEditor id={1} />`
 
 This is an example using bindResource to connect a simple form to an AJAX endpoint.
@@ -58,22 +69,23 @@ This is an example using bindResource to connect a simple form to an AJAX endpoi
 ```js
 import React from 'react'
 import { bindResource } from 'redux-supermodel'
-import { post } from './api'
+import { post } from './resources'
 
-export function PostEditor ({ post, updatePost }) {
-  const { ready, error, payload } = post
-
+export function PostEditor ({ ready, error, id, title, body, updatePost }) {
   if (!ready) return <div>Please wait...</div>
-  if (error) return <div>{error.response.data}</div>
+  if (error) return <div>Something unexpected happened...</div>
 
   function handleSubmit(e) {
     e.preventDefault()
+    const fields = e.target.elements
 
-    const { id, title, body } = e.target.elements
-    updatePost({ id: id.value, title: title.value, body: body.value })
+    updatePost({ 
+      id: fields.id.value, 
+      title: fields.title.value, 
+      body: fields.body.value 
+    })
   }
 
-  const { id, title, body } = payload.data
   return (
     <form onSubmit={handleSubmit}>
       Title: <input name="title" type="text" defaultValue={title} />
@@ -85,14 +97,26 @@ export function PostEditor ({ post, updatePost }) {
   )
 }
 
-export default bindResource({ post })(PostEditor)
-```
-
-You can change how the component will fetch the data using the `mount` option:
-
-```js
-export default bindResource({ post }, { mount(props) {
-    props.fetchPost({ id: props.id })
+export function mount({id, fetchPost}) {
+  if (id) {
+    return fetchPost({ id })
   }
-})(PostEditor)
+}
+
+export function mergeProps(stateProps, dispatchProps, ownProps) {
+  const { ready, error, payload } = stateProps.post
+  const data = payload && payload.data
+
+  return { 
+    ...ownProps, 
+    ...dispatchProps,
+    ready,
+    error,
+    id: data && data.id,
+    title: data && data.title,
+    body: data && data.body
+  }
+}
+
+export default bindResource({ post }, { mount, mergeProps })(PostEditor)
 ```
