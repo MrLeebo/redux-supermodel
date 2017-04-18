@@ -34,7 +34,7 @@ The rest of this document is going to go into more detail about how resources wo
 |idAttribute|string|`'id'`|In case your resource uses a different key, use this option to change it|
 |rootParam|boolean or string|`false`|`true` will use the resource name as the root, a string value will be used as the root, any other value will be ignored|
 |defaultPayload|any|`undefined`|The value of the resource's payload before it has been updated by making a request.|
-|transform|function or function[]|(state, previousState, isFulfilled, meta) => isFulfilled ? state : previousState|An optional transform function to map the API data before saving it to the redux store.|
+|transform|function or function[]|(state, previousState, isFulfilled, meta) => isFulfilled ? state : previousState|An optional transform function to map the API data before saving it to the redux store. If an array of transform functions are provided, the output state of each will be used as the input state of the next.|
 
 #### transform(state, previousState, isFulfilled, meta) => newState
 
