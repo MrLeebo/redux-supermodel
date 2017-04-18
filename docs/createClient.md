@@ -1,12 +1,12 @@
 ## `createClient(url, options)`
 
-This is your entry point into *redux-supermodel*. First you create your client, and with that you can create [resources](docs/resources.md) that belong to that client. Resources represent the actual API endpoints you are going to be interacting with. 
+This is your entry point into *redux-supermodel*. First you create your client, and with that you can create [resources](resources.md) that belong to that client. Resources represent the actual API endpoints you are going to be interacting with. 
 The client is responsible for authentication logic, proxies, custom headers, or any other configuration steps necessary to interact with your API.
 
 ### Parameters
 |parameter|type|default|description|
 | :--- | :--- | :---: |:--- |
-|url|string|`'/'`|The base URL of the API you are creating a client for. The base URL should be the path to the root of the API, not the path to any particular endpoint... we'll get to that [later](docs/resources.md).|
+|url|string|`'/'`|The base URL of the API you are creating a client for. The base URL should be the path to the root of the API, not the path to any particular endpoint... we'll get to that [later](resources.md).|
 |options|object|`{}`|See below.|
 
 If you invoke `createClient(options)` without a url, the url will default to `'/'`
@@ -40,4 +40,4 @@ function basicAuthentication(config) {
 const client = createClient('https://example.com/api/v1', { before: basicAuthentication })
 ```
 
-Next, we'll look at how to use your `client` to create [resources](docs/resources.md).
+Next, we'll look at how to use your `client` to create [resources](resources.md).
