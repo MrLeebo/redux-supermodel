@@ -128,7 +128,13 @@ transforming your redux state into props that you can use to render your resourc
 const todos = client('todos')
 
 export function mapStateToProps(state) {
-  return { todos: todos(state) }
+  const { ready, error, payload } = todos(state)
+
+  return {
+    ready,
+    error: error && error.response && error.response.data,
+    data: payload && payload.response && payload.response.data
+  }
 }
 
 export default connect(mapStateToProps)(MyComponent)
@@ -170,21 +176,19 @@ When you map the resource to props in this way, these are the properties you wil
 The resource also contains action creators to dispatch AJAX requests and update the resource state in redux.
 
 ```js
-export function mapDispatchToProps(dispatch) {
-  return bindActionCreators({
-    fetch: todos.fetch,
-    create: todos.create,
-    update: todos.update,
-    destroy: todos.destroy
-    reset: todos.reset
-  }, dispatch)
+const actions = {
+  fetch: todos.fetch,
+  create: todos.create,
+  update: todos.update,
+  destroy: todos.destroy
+  reset: todos.reset
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(MyComponent)
+export default connect(mapStateToProps, actions)(MyComponent)
 ```
 
 Each action creator (except for reset) is a promisified action creator where the promise is the AJAX request. 
-The code above is equivalent to using `this.props.dispatch(todos.fetch())` from an event handler in your connected component, if you prefer that over writing a `mapDispatchToProps` function.
+The code above is equivalent to using `this.props.dispatch(todos.fetch())` from an event handler in your connected component.
 
 
 |action creator|description|
@@ -243,32 +247,36 @@ blogs.fetch({ filter: 'recent' })
 ### Reading resource state
 
 Even though your resource behaves like an object, it is also a function itself. 
-When you call `resource(state)` where `state` is your Redux Store state, it will return several props to help you render your resource from your React component.
+When you call `resource(state)` where `state` is your Redux Store state, it will return several props to help you render your resource from your React component. 
 One way to do this is through the `mapStateToProps` function in your connected component's `connect()` decorator. Actions (Fetch, Create, Update, Destroy) can be bound with `mapDispatchToProps`.
 
 ```js
 // TodoListContainer.jsx
 
 import React from 'react'
-import { bindActionCreators } from 'redux'
 import { connect } from 'react-redux'
 import { todos } from './resources'
 import TodoList from './TodoList'
 
 export function mapStateToProps(state) {
-  return { todos: todos(state) }
+  const { ready, error, payload } = todos(state)
+
+  return { 
+    ready,
+    error: error && error.response && error.response.data,
+    data: payload && payload.data
+  }
 }
 
-export function mapDispatchToProps(dispatch) {
-  return bindActionCreators({
-    fetchList: todos.fetch,
-    createNew: todos.create
-  }, dispatch)
+const actions = {
+  fetchList: todos.fetch,
+  completeTask: todo => todos.update({ todo, finished: true }),
+  createNew: todo => todos.create({ todo, finished: false })
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(TodoList)
+export default connect(mapStateToProps, actions)(TodoList)
 ```
 
-All of this put together will give you a TodoList component (defined elsewhere) that has several props (defined below) to render the state of the `todos` resource and two callback props `fetchList()` and `createNew()` which will execute the AJAX requests and update the state of the resource with the results.
+All of this put together will give you a TodoList component (defined elsewhere) that has several props (defined below) to render the state of the `todos` resource and two callback props `fetchList()` and `createNew("pick up milk")` which will execute the AJAX requests and update the state of the resource with the results.
 
 This is a more in-depth picture of how resources work in redux, but you usually won't need to write up all of this code yourself. The [bindResource](bindResource.md) higher-order component is here to help!

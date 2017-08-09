@@ -1,11 +1,14 @@
 import React from 'react'
+import { bindResource } from 'redux-supermodel'
 import { Link } from 'react-router-dom'
+import { posts } from '../lib/resources'
 
 const source = 'https://github.com/MrLeebo/redux-supermodel/blob/master/example/src/components/PostDetailPage.js'
 const documentation = 'https://github.com/MrLeebo/redux-supermodel/blob/master/docs/bindResource.md'
 
-export default function PostDetailPage ({ id, title, body }) {
-  if (!id) return <i className='fa fa-refresh fa-spin' />
+export function PostDetailPage ({ ready, error, id, title, body }) {
+  if (!ready) return <i className='fa fa-refresh fa-spin' />
+  if (error) return <i className='text-danger'>An error occurred: {error.message}</i>
 
   return (
     <form className='form form-horizontal'>
@@ -17,7 +20,14 @@ export default function PostDetailPage ({ id, title, body }) {
             <li className='pull-right'><a target='_blank' href={documentation}><small>documentation</small></a></li>
           </ul>
 
-          <Link to='/posts' className='btn btn-default pull-right'>Back</Link>
+          <div className='pull-right'>
+            <Link to='/posts' className='btn btn-default'>Back</Link>
+            &nbsp;
+            <Link to={`/posts/${id + 1}`} className='btn btn-default'>Next</Link>
+            &nbsp;
+            <Link to={`/posts/${id - 1}`} className='btn btn-default'>Previous</Link>
+          </div>
+
           <p className='lead'>
             Uses <a target='_blank' href={documentation}><code>bindResource</code></a> to fetch the post details.
           </p>
@@ -43,3 +53,22 @@ export default function PostDetailPage ({ id, title, body }) {
     </form>
   )
 }
+
+export function mapProps (state) {
+  const { ready, error, payload } = posts(state)
+  const { data: { id, title, body } = {} } = payload
+  return { ready, error, id, title, body }
+}
+
+export function mount (props) {
+  const { match, fetchPosts } = props
+  return fetchPosts({ id: match.params.id })
+}
+
+export function willReceiveProps (props, nextProps) {
+  if (props.match.params.id !== nextProps.match.params.id) {
+    mount(nextProps)
+  }
+}
+
+export default bindResource({posts}, {mapProps, mount, willReceiveProps})(PostDetailPage)

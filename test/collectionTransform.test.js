@@ -14,6 +14,32 @@ describe('collectionTransform', () => {
     assert.equal(collectionTransform(), null)
   })
 
+  describe('with fetch action', () => {
+    def('payload', () => ({ data: { id: 2 } }))
+    def('previous', () => ({ data: [{ id: 1 }] }))
+    def('meta', () => ({ action: 'fetch' }))
+
+    it('should return previous', () => {
+      assert.deepEqual($subject, $previous)
+    })
+
+    describe('fulfilled', () => {
+      def('isFulfilled', () => true)
+
+      it('should return payload', () => {
+        assert.deepEqual($subject, $payload)
+      })
+    })
+
+    describe('without previous', () => {
+      def('previous', () => undefined)
+
+      it('should return default', () => {
+        assert.deepEqual($subject, $previous)
+      })
+    })
+  })
+
   describe('with create action', () => {
     def('payload', () => ({ data: { id: 2 } }))
     def('previous', () => ({ data: [{ id: 1 }] }))
@@ -28,6 +54,14 @@ describe('collectionTransform', () => {
 
       it('should create new item', () => {
         assert.deepEqual($subject, { data: [{ id: 1 }, { id: 2 }] })
+      })
+
+      describe('with no previous', () => {
+        def('previous', () => undefined)
+
+        it('should return payload', () => {
+          assert.deepEqual($subject, { data: [{ id: 2 }] })
+        })
       })
     })
   })
@@ -81,6 +115,22 @@ describe('collectionTransform', () => {
 
         it('should remove item', () => {
           assert.deepEqual($subject, { data: [{ id: 2 }, { id: 3 }] })
+        })
+      })
+
+      describe('with invalid id', () => {
+        def('meta', () => ({ action: 'destroy', inputData: { id: -1 } }))
+
+        it('should not set pending delete', () => {
+          assert.deepEqual($subject, $previous)
+        })
+
+        describe('fulfilled', () => {
+          def('isFulfilled', () => true)
+
+          it('should not remove anything', () => {
+            assert.deepEqual($subject, $previous)
+          })
         })
       })
     })

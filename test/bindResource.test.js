@@ -1,33 +1,43 @@
-/* global $subject, $agent, $options, $client, $resource, $onMountError $mount, $a, $b */
+/* global $subject, $agent, $options, $client, $resource, $onMountError, $mapProps, $mount, $willReceiveProps, $onWillReceivePropsError, $unmount, $onUnmountError, $a, $b */
 /* eslint-env mocha */
 import React from 'react'
 import assert from 'assert'
 import mock from 'mock-require'
-import { spy } from 'sinon'
+import { spy, stub } from 'sinon'
 import { mount } from 'enzyme'
 
 import app from './fixtures/app'
 import request from './fixtures/axiosTest'
 import store from './fixtures/store'
 
-import bindResource from '../lib/bindResource'
+import bindResource, { getDisplayName } from '../lib/bindResource'
 import createClient from '../lib/createClient'
 
-function MyComponent (props) {
-  return <div />
-}
+const MyComponent = () => <div />
 
 describe('bindResource', () => {
   subject(() => (resources, options = $options) => {
     const Component = bindResource(resources, options)(MyComponent)
-    return mount(<Component store={store} onMountError={$onMountError} />)
+    return mount(
+      <Component
+        store={store}
+        onMountError={$onMountError}
+        onWillReceivePropsError={$onWillReceivePropsError}
+        onUnmountError={$onUnmountError}
+      />
+    )
   })
 
   def('options', () => ({}))
   def('agent', () => request(app))
   def('client', () => createClient({ agent: $agent }))
   def('resource', () => $client('blogs'))
+  def('mount', spy)
+  def('unmount', spy)
   def('onMountError', spy)
+  def('onWillReceivePropsError', spy)
+  def('onUnmountError', spy)
+  def('mapProps', () => stub().returns({}))
 
   describe('mounted component', () => {
     subject(() => $subject({ resource: $resource }))
@@ -47,7 +57,6 @@ describe('bindResource', () => {
     })
 
     describe('with mount function', () => {
-      def('mount', spy)
       def('options', () => ({ mount: $mount }))
 
       it('should fetch on mount', () => {
@@ -68,6 +77,63 @@ describe('bindResource', () => {
             () => assert($onMountError.calledOnce)
           )
         })
+      })
+    })
+
+    describe('with mapProps function', () => {
+      def('options', () => ({ mapProps: $mapProps }))
+
+      it('should override default mapStateToProps', async () => {
+        assert($subject)
+        assert($mapProps.called)
+      })
+    })
+
+    describe('with willReceiveProps function', () => {
+      def('options', () => ({ willReceiveProps: $willReceiveProps }))
+
+      describe('with willReceiveProps rejected promise', () => {
+        def('willReceiveProps', () => () => Promise.reject(new Error('rejected')))
+
+        it('should catch on willReceiveProps', () => {
+          assert($subject.setProps($subject.props()))
+          return $willReceiveProps().then(
+            () => assert.fail(null, null, 'Expected rejected promise'),
+            () => assert($onWillReceivePropsError.calledOnce)
+          )
+        })
+      })
+    })
+
+    describe('with unmount function', () => {
+      def('options', () => ({ unmount: $unmount }))
+
+      describe('with unmount rejected promise', () => {
+        def('unmount', () => () => Promise.reject(new Error('rejected')))
+
+        it('should catch on unmount', () => {
+          assert($subject.unmount())
+          return $unmount().then(
+            () => assert.fail(null, null, 'Expected rejected promise'),
+            () => assert($onUnmountError.calledOnce)
+          )
+        })
+      })
+    })
+
+    describe('with connect options', () => {
+      def('options', () => ({ connectOptions: { withRef: true } }))
+
+      it('should ref', () => {
+        assert($subject.get(0).wrappedInstance)
+      })
+    })
+
+    describe('with merge props', () => {
+      def('options', () => ({ mount () {}, mergeProps () { return { merged: true, fetchAll () {}, resetAll () {} } } }))
+
+      it('should invoke function', () => {
+        assert($subject.find('MyComponent').prop('merged'))
       })
     })
   })
@@ -121,6 +187,33 @@ describe('bindResource', () => {
 
     after(() => {
       mock.stop('react-redux')
+    })
+  })
+
+  describe('displayName', () => {
+    it('should display default name', () => {
+      assert.equal(getDisplayName(), 'ResourceBound(Anonymous)')
+    })
+
+    it('should display function name', () => {
+      function FunctionalComponent () { return null }
+
+      assert.equal(getDisplayName(FunctionalComponent), 'ResourceBound(FunctionalComponent)')
+    })
+
+    it('should display class name', () => {
+      class ClassComponent extends React.Component {
+        render () { return null }
+      }
+
+      assert.equal(getDisplayName(ClassComponent), 'ResourceBound(ClassComponent)')
+    })
+
+    it('should display override name', () => {
+      function ActualComponent () { return null }
+      ActualComponent.displayName = 'OverrideComponent'
+
+      assert.equal(getDisplayName(ActualComponent), 'ResourceBound(OverrideComponent)')
     })
   })
 })

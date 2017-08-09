@@ -240,6 +240,13 @@ describe('reducer', () => {
     })
   })
 
+  describe('nuke', () => {
+    it('should return blank state', () => {
+      const action = { type: types.NUKE }
+      assert.deepEqual($subject(action), {})
+    })
+  })
+
   it('should throw for invalid action', () => {
     const type = `${types.PREFIX}INVALID`
     const action = { type }

@@ -5,7 +5,7 @@
   "private": true,
   "devDependencies": {
     "gh-pages": "^0.12.0",
-    "react-scripts": "0.9.5"
+    "react-scripts": "^1.0.11"
   },
   "dependencies": {
     "classnames": "^2.2.5",
@@ -17,7 +17,8 @@
     "react-router-dom": "^4.1.1",
     "redux": "^3.6.0",
     "redux-logger": "^3.0.1",
-    "redux-promise-middleware": "^4.2.0"
+    "redux-promise-middleware": "^4.2.0",
+    "redux-supermodel": "^0.13.0"
   },
   "scripts": {
     "start": "react-scripts start",

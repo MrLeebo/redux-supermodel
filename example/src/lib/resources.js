@@ -1,4 +1,4 @@
-import createClient from '../../../dist/createClient'
+import { createClient } from 'redux-supermodel'
 
 const client = createClient('https://jsonplaceholder.typicode.com')
 

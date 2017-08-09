@@ -4,7 +4,7 @@ This helper will bind an object full of resource definitions to a component. On 
 
 When you write this:
 
-```js
+```jsx
 const post = client('post' { urlRoot: 'posts' })
 export default bindResource({ post })(PostEditor)
 ```
@@ -34,39 +34,21 @@ The component `PostEditor` will receive all of these props:
 
 |option|type|default|description|
 |:---|:---:|:---:|:---|
-|mount|function|<code>props&nbsp;=>&nbsp;props.fetchAll()</code>||
+|mount|function|<code>props&nbsp;=>&nbsp;props.fetchAll()</code>|Will be invoked as part of the component lifecycle at `componentDidMount`. If an error is thrown, it will be handled by `onMountError`.|
+|willReceiveProps|function|`undefined`|Will be invoked as part of the component lifecycle at `componentWillReceiveProps`. The parameters are <code>(props,&nbsp;nextProps)</code>|
+|unmount|function|<code>props&nbsp;=>&nbsp;props.resetAll()</code>|Will be invoked as part of the component lifecycle at `comonentWillUnmount`. If an error is thrown, it will be handled by `onUnmountError`.|
+|onMountError|function|`console.error`||
+|onUnmountError|function|`console.error`||
+|onWillReceivePropsError|function|`console.error`||
+|mapProps|function||By default, bindResource will attach each resource as a prop of the component, but most components don't need to access every part of the resource. This option is equivalent to defining the `mapStateToProps` function on the `connect()` function.|
 |mergeProps|function|<code>(stateProps,&nbsp;dispatchProps,&nbsp;ownProps)&nbsp;=> ({&nbsp;...ownProps,&nbsp;...dispatchProps,&nbsp;...stateProps&nbsp;}))</code>|Function where you can cherry pick props to pass to your component, calculate new computed props based on your resource state, and map/reduce your data to be ready for consumption by your Component.|
-|connectOptions|object|`{withRef:true}`|Passed as the 4th parameter to the `connect()` function. See the [docs](https://github.com/reactjs/react-redux/blob/master/docs/api.md#connectmapstatetoprops-mapdispatchtoprops-mergeprops-options) for more information.|
-
-```js
-const users = client('users')
-const likes = client('likes')
-const topics = client('topics')
-
-bindResource({
-  users,
-  likes,
-  topics
-})(ComplexComponent)
-
-// The state selector value and dispatch-bound action creators will be added to the component for each resource
-// The resource key name will help you distinguish them, for instance:
-//
-// this.props.users.ready
-// this.props.fetchUsers()
-// this.props.likes.error
-// this.props.createLikes()
-// this.props.topics.payload
-// this.props.destroyTopics()
-//
-// ... and so on.
-```
+|connectOptions|object|`undefined`|Passed as the 4th parameter to the `connect()` function. See the [docs](https://github.com/reactjs/react-redux/blob/master/docs/api.md#connectmapstatetoprops-mapdispatchtoprops-mergeprops-options) for more information.|
 
 ### Example `<PostEditor id={1} />`
 
 This is an example using bindResource to connect a simple form to an AJAX endpoint.
 
-```js
+```jsx
 import React from 'react'
 import { bindResource } from 'redux-supermodel'
 import { post } from './resources'
@@ -75,7 +57,7 @@ export function PostEditor ({ ready, error, id, title, body, updatePost }) {
   if (!ready) return <div>Please wait...</div>
   if (error) return <div>Something unexpected happened...</div>
 
-  function handleSubmit(e) {
+  function handleSubmit (e) {
     e.preventDefault()
     const fields = e.target.elements
 
@@ -97,26 +79,42 @@ export function PostEditor ({ ready, error, id, title, body, updatePost }) {
   )
 }
 
-export function mount({id, fetchPost}) {
+export function mount ({id, fetchPost}) {
   if (id) {
     return fetchPost({ id })
   }
 }
 
-export function mergeProps(stateProps, dispatchProps, ownProps) {
-  const { ready, error, payload } = stateProps.post
-  const data = payload && payload.data
-
-  return { 
-    ...ownProps, 
-    ...dispatchProps,
-    ready,
-    error,
-    id: data && data.id,
-    title: data && data.title,
-    body: data && data.body
-  }
+export function mapProps (state) {
+  const { 
+    ready, error, payload: { data: { id, title, body } = {} } 
+  } = post(state)
+  return { ready, error, id, title, body }
 }
 
-export default bindResource({ post }, { mount, mergeProps })(PostEditor)
+export default bindResource({ post }, { mount, mapProps })(PostEditor)
+```
+
+### Mapping multiple resources at once
+
+When you bind more than one resource to a component with `bindResource()`, the object key will be attached to each action name so that they don't all resolve to the same function names.
+
+```jsx
+const users = client('users')
+const likes = client('likes')
+const topics = client('topics')
+
+export default bindResource({ users, likes, topics })(ComplexComponent)
+
+// The state selector value and dispatch-bound action creators will be added to the component for each resource
+// The resource key name will help you distinguish them, for instance:
+//
+// this.props.users.ready
+// this.props.fetchUsers()
+// this.props.likes.error
+// this.props.createLikes()
+// this.props.topics.payload
+// this.props.destroyTopics()
+//
+// ... and so on.
 ```

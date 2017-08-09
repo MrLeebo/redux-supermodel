@@ -129,14 +129,12 @@ MyComponent.propTypes = {
 ### `resource` Action Creators
 
 ```js
-function mapDispatchToProps (dispatch) {
-  return bindActionCreators({
-    resetBlogs: blogs.reset,
-    fetchBlogs: blogs.fetch,
-    createBlog: blogs.create,
-    updateBlog: blogs.update,
-    destroyBlog: blogs.destroy
-  }, dispatch)
+const actions = {
+  resetBlogs: blogs.reset,
+  fetchBlogs: blogs.fetch,
+  createBlog: blogs.create,
+  updateBlog: blogs.update,
+  destroyBlog: blogs.destroy
 }
 ```
 

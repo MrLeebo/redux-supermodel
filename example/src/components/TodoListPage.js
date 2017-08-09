@@ -1,12 +1,14 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
+import { bindResource } from 'redux-supermodel'
 import './TodoList.css'
 import TodoListTableRow from './TodoListTableRow'
+import { todos } from '../lib/resources'
 
 const source = 'https://github.com/MrLeebo/redux-supermodel/blob/master/example/src/components/TodoListPage.js'
 const documentation = 'https://github.com/MrLeebo/redux-supermodel/blob/master/docs/api.md'
 
-export default class TodoListPage extends Component {
+export class TodoListPage extends Component {
   state = { selected: null }
 
   handleChange = ({id, completed}) => {
@@ -21,15 +23,13 @@ export default class TodoListPage extends Component {
     this.setState({ selected: id === this.state.selected ? null : id })
   }
 
-  handleRefresh = () => {
-    this.props.fetchTodos().then(this.deselectRow)
+  handleRefresh = async () => {
+    await this.props.fetchTodos()
+    this.setState({ selected: null })
   }
 
-  handleSubmitEdit = ({id, title}) => {
-    return this.props.updateTodos({ id, title }).then(this.deselectRow)
-  }
-
-  deselectRow = () => {
+  handleSubmitEdit = async ({id, title}) => {
+    await this.props.updateTodos({ id, title })
     this.setState({ selected: null })
   }
 
@@ -49,7 +49,7 @@ export default class TodoListPage extends Component {
   }
 
   render() {
-    const { busy, rows } = this.props
+    const { busy, error, data } = this.props
 
     return (
       <div>
@@ -77,6 +77,8 @@ export default class TodoListPage extends Component {
             >
               {busy && <i className="fa fa-refresh fa-spin" />} Refresh
             </button>
+
+            {error && <span className="text-danger">{error.message}</span>}
           </div>
 
           <table className="table table-condensed table-hover">
@@ -88,7 +90,7 @@ export default class TodoListPage extends Component {
               </tr>
             </thead>
             <tbody>
-              {rows && rows.map(this.renderItem)}
+              {data.map(this.renderItem)}
             </tbody>
           </table>
         </div>
@@ -102,3 +104,10 @@ TodoListPage.propTypes = {
   children: PropTypes.node,
   fetchTodos: PropTypes.func.isRequired
 }
+
+export function mapProps (state) {
+  const { busy, error, payload: { data = [] } } = todos(state)
+  return { busy, error, data }
+}
+
+export default bindResource({todos}, {mapProps})(TodoListPage)

@@ -15,8 +15,20 @@ describe('createClient', () => {
       assert.equal(typeof createClient(), 'function')
     })
 
+    it('should assign url', () => {
+      assert.equal(createClient('/blogs').baseUrl, '/blogs')
+    })
+
+    it('should assign options', () => {
+      assert.equal(createClient({ test: true }).baseUrl, '/')
+    })
+
     it('should assign base url', () => {
       assert.equal(createClient({}).baseUrl, '/')
+    })
+
+    it('should allow options', () => {
+      assert.equal(createClient('/a', { url: '/b' }).baseUrl, '/a')
     })
   })
 

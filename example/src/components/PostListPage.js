@@ -1,10 +1,15 @@
 import React from 'react'
+import { bindResource } from 'redux-supermodel'
 import { Link } from 'react-router-dom'
+import { posts } from '../lib/resources'
 
 const source = 'https://github.com/MrLeebo/redux-supermodel/blob/master/example/src/components/PostListPage.js'
 const documentation = 'https://github.com/MrLeebo/redux-supermodel/blob/master/docs/bindResource.md'
 
-export default function PostListPage ({ rows }) {
+export function PostListPage ({ready, error, data}) {
+  if (!ready) return <i className='fa fa-refresh fa-spin' />
+  if (error) return <i className='text-danger'>An error occurred: {error.message}</i>
+
   return (
     <div className='container'>
       <div>
@@ -28,9 +33,16 @@ export default function PostListPage ({ rows }) {
           </tr>
         </thead>
         <tbody>
-          {rows && rows.map(({id, title}) => <tr key={id}><td><Link to={`/posts/${id}`}>{title}</Link></td></tr>)}
+          {data.map(({id, title}) => <tr key={id}><td><Link to={`/posts/${id}`}>{title}</Link></td></tr>)}
         </tbody>
       </table>
     </div>
   )
 }
+
+export function mapProps (state) {
+  const { ready, error, payload: { data = [] } } = posts(state)
+  return { ready, error, data }
+}
+
+export default bindResource({posts}, {mapProps})(PostListPage)
