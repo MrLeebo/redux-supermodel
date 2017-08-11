@@ -53,63 +53,41 @@ export const post = client('post', { url: 'posts/latest' })
 
 The easiest way to use **redux-supermodel** is with the [bindResource](docs/bindResource.md) higher-order component which will automatically fetch the resource when the component mounts, reset it when the component unmounts, and binds the resource's props and action creators to the component's props. 
 
-```js
+```jsx
 // MyComponent.js
 
 import React from 'react'
 import { bindResource } from 'redux-supermodel'
 import { post } from './resources'
 
-function MyComponent ({ready, error, title, body, fetchPost}) {
+export function MyComponent (props) {
+  const { ready, error, title, body, fetchPost } = props
   if (!ready) return <div className="loading">Loading...</div> 
-  if (error) return <div className="error">{error}</div>
-
+  if (error) return <div className="error">{error.message}</div>
+  
   return (
     <div>
       <h1>{title}</h1>
       <div className="body">
         {body}
       </div>
-      <button type="button" onClick={() => fetchPost()}>Refresh</button>
+      <button type="button" onClick={fetchPost}>Refresh</button>
     </div>
   )
 }
 
-export function mergeProps (stateProps, dispatchProps, ownProps) {
-  const { 
-    ready, 
-    error, 
-    payload
-  } = stateProps.post
-
-  const err = error && error.response && error.response.data
-  const data = payload && payload.data
-
-  // The stateProps parameter can get rather large and have lots of unwieldy data structures,
-  // use mergeProps as an opportunity to be a bit selective and only return the stateProps
-  // values that you are going to use in your component.
-  //
-  // The same advice also applies to dispatchProps and ownProps, to a lesser extent, its not as
-  // important to do so in those cases because A) you will already be defining ownProps 
-  // somewhere else in your app and B) the `bindResource` higher-order component will dispatch
-  // some callbacks on your behalf (by default `fetchAll()` on mount and `resetAll()` on unmount)
-  return { 
-    ...ownProps, 
-    ...dispatchProps, 
-    ready, 
-    error: err && err.message, 
-    title: data && data.title, 
-    body: data && data.body 
-  }
+export function mapProps (state) {
+  const { ready, error, payload } = post(state)
+  const { data: { title, body } = {} } = payload
+  return { ready, error, title, body }
 }
 
-const resources = { post }
-export default bindResource(resources, { mergeProps })(MyComponent)
+export default bindResource({post}, {mapProps})(MyComponent)
 ```
 
-The advice offered by this [blog post](https://goshakkk.name/redux-antipattern-mapstatetoprops/) is about mapStateToProps, but it applies to how we are using mergeProps here.
+The payload can be a massive object containing lots of information about the HTTP request and response, most of which you aren't going to need when you're rendering your component, so I suggest using the `mapProps` call to simplify the payload to just the stuff you're going to need. Try to avoid using payload directly. Check out this [blog post](https://goshakkk.name/redux-antipattern-mapstatetoprops/) for further reading.
 
-For details on mergeProps, read the [react-redux connect()](https://github.com/reactjs/react-redux/blob/master/docs/api.md#connectmapstatetoprops-mapdispatchtoprops-mergeprops-options) documentation.
+For details on mapProps, read the [react-redux connect()](https://github.com/reactjs/react-redux/blob/master/docs/api.md#connectmapstatetoprops-mapdispatchtoprops-mergeprops-options) documentation.
 
 For the full list of options, see [bindResource](docs/bindResource.md).
 
