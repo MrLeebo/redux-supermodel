@@ -77,6 +77,11 @@ describe('actionCreators', () => {
 
         assertRequestBody(result, { blogs })
       })
+
+      it('should ignore synthetic events', async () => {
+        const result = await $subject.fetch({ nativeEvent: {} }).payload
+        assertPath(result, '/blogs')
+      })
     })
 
     describe('with root param string', () => {

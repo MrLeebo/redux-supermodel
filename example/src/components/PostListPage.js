@@ -6,7 +6,8 @@ import { posts } from '../lib/resources'
 const source = 'https://github.com/MrLeebo/redux-supermodel/blob/master/example/src/components/PostListPage.js'
 const documentation = 'https://github.com/MrLeebo/redux-supermodel/blob/master/docs/bindResource.md'
 
-export function PostListPage ({ready, error, data}) {
+export function PostListPage (props) {
+  const { ready, error, data, fetchPosts } = props
   if (!ready) return <i className='fa fa-refresh fa-spin' />
   if (error) return <i className='text-danger'>An error occurred: {error.message}</i>
 
@@ -19,6 +20,11 @@ export function PostListPage ({ready, error, data}) {
             <li><a target='_blank' href={source}><small>view source</small></a></li>
             <li className='pull-right'><a target='_blank' href={documentation}><small>documentation</small></a></li>
           </ul>
+
+          <div className="pull-right">
+            <button onClick={fetchPosts} className="btn btn-default">Refresh</button>
+          </div>
+
           <p className='lead'>
             Uses <a target='_blank' href={documentation}><code>bindResource</code></a> to retrieve a list of posts, rendering links to each entry.
           </p>
