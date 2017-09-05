@@ -51,29 +51,62 @@ const client = createClient('http://example.com/api')
 export const post = client('post', { url: 'posts/latest' }) 
 ```
 
-The easiest way to use **redux-supermodel** is with the [bindResource](docs/bindResource.md) higher-order component which will automatically fetch the resource when the component mounts, reset it when the component unmounts, and binds the resource's props and action creators to the component's props. 
+You can use the `connect` Higher-Order Component to attach your resource state to your component and bind any action creators you want to use. Most of the time, you will be fetching something when the component mounts. If this is the only component that will use the resource, you can reset it when the component unmounts. Usually `create` and `update` action creators will be bound to the button or submit handlers on your form.
 
 ```jsx
 // MyComponent.js
 
-import React from 'react'
-import { bindResource } from 'redux-supermodel'
+import React, { Component } from 'react'
+import { connect } from 'react-redux'
 import { post } from './resources'
 
-export function MyComponent (props) {
-  const { ready, error, title, body, fetchPost } = props
-  if (!ready) return <div className="loading">Loading...</div> 
-  if (error) return <div className="error">{error.message}</div>
+export class MyComponent extends Component {
+  async componentDidMount() {    
+    try {
+      const res = await this.props.fetchPost()
+      
+      // AJAX action creators are promises, so you can await on them to 
+      // handle errors or do something after they finish.
+      console.log(res)
+    } catch (error) {
+      // redux-supermodel will track the error state for you, but 
+      // you can also do your own thing.
+      alert('Something bad happened!')
+    }
+  }
   
-  return (
-    <div>
-      <h1>{title}</h1>
-      <div className="body">
-        {body}
+  componentWillUnmount() {
+    // If you only ever access a resource within the context of a single component and
+    // its children, you can reset the resource on unmount to clean up your redux state.
+    this.props.resetPost()
+  }
+
+  render() {
+    const { initialized, error, title, body, fetchPost } = props
+    
+    if (!initialized) {
+      if (error) {
+        return <div className="error">{error.message}</div>
+      } else {
+        return <div className="loading">Loading...</div> 
+      }
+    }
+
+    return (
+      <div>
+        <h1>{title}</h1>
+        <div className="body">
+          {body}
+        </div>
+
+        <div className="error">
+          {error.message}
+        </div>
+
+        <button type="button" onClick={fetchPost}>Refresh</button>
       </div>
-      <button type="button" onClick={fetchPost}>Refresh</button>
-    </div>
-  )
+    )
+  }
 }
 
 export function mapProps (state) {
@@ -82,7 +115,12 @@ export function mapProps (state) {
   return { ready, error, title, body }
 }
 
-export default bindResource({post}, {mapProps})(MyComponent)
+const actions = { 
+  fetchPost: () => post.fetch({ id: 'latest' }),
+  resetPost: post.reset,
+}
+
+export default connect(mapProps, actions)(MyComponent)
 ```
 
 The payload can be a massive object containing lots of information about the HTTP request and response, most of which you aren't going to need when you're rendering your component, so I suggest using the `mapProps` call to simplify the payload to just the stuff you're going to need. Try to avoid using payload directly. Check out this [blog post](https://goshakkk.name/redux-antipattern-mapstatetoprops/) for further reading.
