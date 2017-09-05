@@ -69,7 +69,7 @@ describe('reducer', () => {
 
       const expected = {
         blogs: {
-          initialized: true,
+          initialized: false,
           busy: true,
           payload: undefined,
           previous: undefined,
@@ -90,7 +90,7 @@ describe('reducer', () => {
 
       const expected = {
         blogs: {
-          initialized: true,
+          initialized: false,
           busy: true,
           payload: { id: 123 },
           previous: undefined,
@@ -122,7 +122,7 @@ describe('reducer', () => {
 
       const expected = {
         blogs: {
-          initialized: true,
+          initialized: false,
           busy: true,
           payload: 16,
           previous: undefined,
@@ -149,7 +149,7 @@ describe('reducer', () => {
 
       const expected = {
         blogs: {
-          initialized: true,
+          initialized: false,
           busy: true,
           payload: expectedPayload,
           previous: undefined,
@@ -195,7 +195,7 @@ describe('reducer', () => {
       }
 
       const expected = { blogs: {
-        initialized: true,
+        initialized: false,
         busy: false,
         payload: { id: 123 },
         previous: null,
@@ -234,6 +234,32 @@ describe('reducer', () => {
           previous: undefined,
           meta
         }
+      }
+
+      assert.deepEqual($subject(action), expected)
+    })
+  })
+
+  describe('with initialized state', () => {
+    def('state', () => ({ blogs: { initialized: true, payload: { id: 123 } } }))
+
+    it('should set rejected', () => {
+      const meta = { resourceName: 'blogs', definition: { url: 'blogs' } }
+      const action = {
+        type: types.REJECTED,
+        payload: 'something broke',
+        error: true,
+        meta
+      }
+
+      const expected = { blogs: {
+        initialized: true,
+        busy: false,
+        payload: { id: 123 },
+        previous: null,
+        error: 'something broke',
+        meta
+      }
       }
 
       assert.deepEqual($subject(action), expected)
