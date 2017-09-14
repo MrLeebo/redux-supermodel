@@ -266,6 +266,23 @@ describe('reducer', () => {
     })
   })
 
+  describe('clearErrors', () => {
+    def('state', () => ({ blogs: { initialized: true, payload: { id: 123 }, error: "Something broke" } }))
+
+    it('should clear errors', () => {
+      const meta = { resourceName: 'blogs' }
+      const action = { type: types.CLEAR_ERRORS, meta }
+
+      const expected = {
+        blogs: {
+          initialized: true, payload: { id: 123 }, error: null
+        }
+      }
+
+      assert.deepEqual($subject(action), expected)
+    })
+  })
+
   describe('nuke', () => {
     it('should return blank state', () => {
       const action = { type: types.NUKE }

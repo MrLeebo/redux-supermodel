@@ -133,6 +133,13 @@ describe('actionCreators', () => {
         assertPath(result, '/blogs/latest')
       })
     })
+
+    describe('errors', () => {
+      it('should clear errors', () => {
+        const { type } = $subject.clearErrors()
+        assert.equal(type, types.CLEAR_ERRORS)
+      })
+    })
   })
 
   describe('nuke', () => {

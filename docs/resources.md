@@ -180,8 +180,9 @@ const actions = {
   fetch: todos.fetch,
   create: todos.create,
   update: todos.update,
-  destroy: todos.destroy
-  reset: todos.reset
+  destroy: todos.destroy,
+  reset: todos.reset,
+  clearErrors: todos.clearErrors
 }
 
 export default connect(mapStateToProps, actions)(MyComponent)
@@ -198,10 +199,14 @@ The code above is equivalent to using `this.props.dispatch(todos.fetch())` from 
 |resource.update|Performs a PUT request|
 |resource.destroy|Performs a DELETE request|
 |resource.reset|See below.|
+|resource.clearErrors|See below.|
 
-Unlike the other action creators, **reset** is NOT a promise nor does it dispatch an AJAX request. 
+Unlike the other action creators, **reset** and **clearErrors** are NOT promises nor does they dispatch an AJAX request. 
+
 Calling `todos.reset(payload)` will assign the new value to your resource's payload without interacting with the API at all.
 If you call `reset()` without any parameters, it will restore your resources' redux state to its initial state, as if it were brand new.
+
+`todos.clearErrors()` will null out the `error` state, in case you are rendering your resource to a form and the server responded with an error that you want to give the user the ability to suppress.
 
 ### Building Resource URLs
 
