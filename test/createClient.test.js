@@ -1,4 +1,4 @@
-/* global $subject, $resource */
+/* global $subject, $resource, $resources */
 import assert from 'assert'
 import createClient from '../lib/createClient'
 import collectionTransform from '../lib/collectionTransform'
@@ -80,6 +80,23 @@ describe('createClient', () => {
         const collection = $subject.createCollection('todos', { transform: myTransform })
         assert.deepEqual(collection.transform, [collectionTransform, myTransform])
       })
+    })
+  })
+
+  describe('resources', () => {
+    def('resources', () => $subject({
+      todos: { urlRoot: 'todos' },
+      blogs: true
+    }))
+
+    it('should create both resources', () => {
+      const state = { resource: {
+        todos: { initialized: true, payload: [1, 2, 3] },
+        blogs: { initialized: true, payload: ['A', 'B', 'C'] }
+      } }
+
+      assert.deepEqual($resources.todos(state).payload, [1, 2, 3])
+      assert.deepEqual($resources.blogs(state).payload, ['A', 'B', 'C'])
     })
   })
 })

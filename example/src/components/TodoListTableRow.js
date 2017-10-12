@@ -11,7 +11,6 @@ export default function TodoListTableRow (props) {
     onEdit,
     onSubmitEdit,
     editing,
-    pendingDelete
   } = props
 
   const handleChange = () => onChange(todo)
@@ -28,7 +27,7 @@ export default function TodoListTableRow (props) {
   }
 
   const trClasses = classNames({
-    danger: pendingDelete
+    danger: todo.pendingDelete
   })
 
   return (
@@ -47,7 +46,7 @@ export default function TodoListTableRow (props) {
           : <span>{todo.completed ? <strike>{todo.title}</strike> : todo.title}</span>
         }
       </td>
-      <td className='text-right'>
+      <td className='text-center'>
         <button className='btn btn-link' disabled={busy} onClick={handleDelete}><i className='fa fa-trash' /></button>
       </td>
     </tr>

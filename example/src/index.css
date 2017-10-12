@@ -4,3 +4,15 @@ body {
   padding-top: 90px;
   font-family: sans-serif;
 }
+
+.table-heading {
+  margin-bottom: 0;
+}
+
+.table-body {
+  table-layout: fixed;
+  max-height: 450px;
+  max-height: 50vh;
+  overflow-y: scroll;
+  overflow-y: overlay;
+}

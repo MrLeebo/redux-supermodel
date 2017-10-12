@@ -40,62 +40,55 @@ import { todos, posts, users } from './resources'
 
 Check the [documentation](resources.md) on resources for information about using resources and what kind of props they can offer for your React components.
 
-### [bindResource](docs/bindResource.md)
-
-You can use `bindResource` to automatically wire up all of the resource props as well as "fetch on mount" and "reset on unmount" behavior for a component. This is useful for page-level components that are associated to a particular resource.
-
-Please read [bindResource.md](docs/bindResource.md) for more details.
-
 ### Creating a Basic Component
 
 When rendering your resource state, be sure to check the `ready` and `error` states before attempting to use the `payload`.
 
 ```js
-import React from 'react'
-import PropTypes from 'prop-types'
-import { bindResource, createClient } from 'redux-supermodel'
+import React, { Component } from 'react'
+import { connect } from 'react-redux'
+import { createClient } from 'redux-supermodel'
 
 const client = createClient('http://jsonplaceholder.typicode.com')
 const todos = client.createCollection('todos', { urlRoot: 'todos' })
 
-export default function TodoList ({createTodos, ready, error, rows}) {
-  if (!ready) return <div className="loading">Please wait...</div>
-  if (error) return <div className="error">{error.response.data}</div>
+export class TodoList extends Component {
+  componentDidMount = () => this.props.fetch()
 
-  return (
-    <div>
+  componentWillUnmount = () => this.props.reset()
+
+  render () {
+    const { create, ready, error, rows } = this.props
+    if (!ready) return <div className="loading">Please wait...</div>
+    if (error) return <div className="error">{error.response.data}</div>
+
+    return (
       <div>
-        <button type="button" onClick={() => createTodos({title: 'new item'})}>
-          Create
-        </button>
+        <div>
+          <button type="button" onClick={create}>
+            Create
+          </button>
+        </div>
+        <table>
+          <tbody>{rows && rows.map(todo => <tr key={row.id}><td>{row.title}</td></tr>)}</tbody>
+        </table>
       </div>
-      <table>
-        <tbody>{rows && rows.map(todo => <tr key={row.id}><td>{row.title}</td></tr>)}</tbody>
-      </table>
-    </div>
-  )
-}
-
-TodoList.propTypes = {
-  createTodos: PropTypes.func,
-  ready: PropTypes.bool,
-  error: PropTypes.object,
-  rows: PropTypes.array
-}
-
-export function mergeProps (stateProps, dispatchProps, ownProps) {
-  const { ready, error, payload } = stateProps.todos
-  
-  return {
-    ...ownProps,
-    ...dispatchProps,
-    ready,
-    error,
-    rows: payload && payload.data
+    )
   }
 }
 
-export default bindResource({ todos }, { mergeProps })(TodoList)
+export mapProps = state => {
+  const { ready, error, payload: { data } } = todos(state)
+  return { ready, error, rows: data }
+}
+
+const actions = {
+  fetch: todos.fetch,
+  create: () => todos.create({ title: 'new item' }),
+  reset: todos.reset,
+}
+
+export default connect(mapProps, actions)(TodoList)
 ```
 
 #### PropTypes

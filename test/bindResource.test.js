@@ -125,7 +125,7 @@ describe('bindResource', () => {
       def('options', () => ({ connectOptions: { withRef: true } }))
 
       it('should ref', () => {
-        assert($subject.get(0).wrappedInstance)
+        assert($subject.instance().getWrappedInstance())
       })
     })
 

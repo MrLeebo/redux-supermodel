@@ -1,7 +1,9 @@
-import { createClient } from 'redux-supermodel'
+import { createClient, collectionTransform } from 'redux-supermodel'
 
 const client = createClient('https://jsonplaceholder.typicode.com')
 
-export const posts = client('posts', { urlRoot: 'posts' })
-export const users = client('users')
-export const todos = client.createCollection('todos', { urlRoot: 'todos' })
+export default client({
+  posts: { urlRoot: 'posts' },
+  todos: { urlRoot: 'todos', transform: collectionTransform },
+  users: true,
+})

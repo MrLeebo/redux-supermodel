@@ -127,8 +127,6 @@ The payload can be a massive object containing lots of information about the HTT
 
 For details on mapProps, read the [react-redux connect()](https://github.com/reactjs/react-redux/blob/master/docs/api.md#connectmapstatetoprops-mapdispatchtoprops-mergeprops-options) documentation.
 
-For the full list of options, see [bindResource](docs/bindResource.md).
-
 ## Installation
 
 ```

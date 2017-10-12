@@ -267,7 +267,7 @@ describe('reducer', () => {
   })
 
   describe('clearErrors', () => {
-    def('state', () => ({ blogs: { initialized: true, payload: { id: 123 }, error: "Something broke" } }))
+    def('state', () => ({ blogs: { initialized: true, payload: { id: 123 }, error: 'Something broke' } }))
 
     it('should clear errors', () => {
       const meta = { resourceName: 'blogs' }

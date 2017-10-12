@@ -12,9 +12,25 @@ export const todos = client('todos')
 
 // https://example.com/api/posts.json
 export const posts = client('posts', { url: 'posts.json' })
+
+// https://example.com/api/blogs/hello-world
+export const blogs = client('blogs', { urlRoot: 'blogs', idAttribute: 'slug' })
+blogs.fetch({ slug: 'hello-world' })
 ```
 
-The rest of this document is going to go into more detail about how resources work, but if you're just browsing, you can skip all of the boring details and go directly to [bindResource](bindResource.md) which will show you how to connect your new resource to your React components!
+You can also pass an object to the client to define multiple resources at once.
+
+```js
+const resources = client({
+  todos: true,
+  posts: { url: 'posts.json' },  
+})
+
+// same as client('todos') and client('posts', { url: 'posts.json' })
+const { todos, posts } = resources
+```
+
+The rest of this document is going to go into more detail about how resources work and what you can do with them.
 
 ## `client(name, options)`
 
