@@ -18,7 +18,7 @@
     "redux": "^3.7.2",
     "redux-logger": "^3.0.6",
     "redux-promise-middleware": "^4.4.1",
-    "redux-supermodel": "^0.17.0"
+    "redux-supermodel": "^0.18.0"
   },
   "scripts": {
     "start": "react-scripts start",
