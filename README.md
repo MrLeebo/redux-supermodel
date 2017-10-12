@@ -49,6 +49,7 @@ const client = createClient('http://example.com/api')
 //
 // { title: 'My latest blog post', body: 'Hello, world!' }
 export const post = client('post', { url: 'posts/latest' }) 
+post.fetch()
 ```
 
 You can use the `connect` Higher-Order Component to attach your resource state to your component and bind any action creators you want to use. Most of the time, you will be fetching something when the component mounts. If this is the only component that will use the resource, you can reset it when the component unmounts. Usually `create` and `update` action creators will be bound to the button or submit handlers on your form.
@@ -75,14 +76,12 @@ export class MyComponent extends Component {
     }
   }
   
-  componentWillUnmount() {
-    // If you only ever access a resource within the context of a single component and
-    // its children, you can reset the resource on unmount to clean up your redux state.
-    this.props.resetPost()
-  }
+  // If you only ever access a resource within the context of a single component and
+  // its children, you can reset the resource on unmount to clean up your redux state.
+  componentWillUnmount = () => this.props.resetPost()
 
   render() {
-    const { initialized, error, title, body, fetchPost } = props
+    const { initialized, error, title, body, fetchPost } = this.props
     
     if (!initialized) {
       if (error) {
