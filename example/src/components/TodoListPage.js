@@ -1,9 +1,9 @@
 import React, { Component } from 'react'
-import PropTypes from 'prop-types'
-import { bindResource } from 'redux-supermodel'
+import { connect } from 'react-redux'
 import './TodoList.css'
 import TodoListTableRow from './TodoListTableRow'
-import { todos } from '../lib/resources'
+import resources from '../lib/resources'
+const { todos } = resources
 
 const source = 'https://github.com/MrLeebo/redux-supermodel/blob/master/example/src/components/TodoListPage.js'
 const documentation = 'https://github.com/MrLeebo/redux-supermodel/blob/master/docs/api.md'
@@ -11,38 +11,35 @@ const documentation = 'https://github.com/MrLeebo/redux-supermodel/blob/master/d
 export class TodoListPage extends Component {
   state = { selected: null }
 
-  handleChange = ({id, completed}) => {
-    return this.props.updateTodos({ id, completed: !completed })
-  }
+  componentDidMount = () => this.props.fetch()
 
-  handleDelete = ({id}) => {
-    return this.props.destroyTodos({ id })
-  }
+  componentWillUnmount = () => this.props.reset()
 
   handleEdit = ({id}) => {
     this.setState({ selected: id === this.state.selected ? null : id })
   }
 
   handleRefresh = async () => {
-    await this.props.fetchTodos()
+    await this.props.fetch()
     this.setState({ selected: null })
   }
 
-  handleSubmitEdit = async ({id, title}) => {
-    await this.props.updateTodos({ id, title })
+  handleSubmitEdit = async todo => {
+    await this.props.update(todo)
     this.setState({ selected: null })
   }
 
   renderItem = todo => {
+    const { toggle, destroy } = this.props
+
     return (
       <TodoListTableRow
         key={todo.id}
         todo={todo}
-        onChange={this.handleChange}
-        onDelete={this.handleDelete}
+        onChange={toggle}
+        onDelete={destroy}
         onEdit={this.handleEdit}
         onSubmitEdit={this.handleSubmitEdit}
-        pendingDelete={todo.pendingDelete}
         editing={this.state.selected === todo.id}
       />
     )
@@ -50,6 +47,14 @@ export class TodoListPage extends Component {
 
   render() {
     const { busy, error, data } = this.props
+
+    const colgroup = (
+      <colgroup>
+        <col style={{ width: 90 }} />
+        <col style={{ width: "1*" }} />
+        <col style={{ width: 90 }} />
+      </colgroup>
+    )
 
     return (
       <div>
@@ -81,7 +86,8 @@ export class TodoListPage extends Component {
             {error && <span className="text-danger">{error.message}</span>}
           </div>
 
-          <table className="table table-condensed table-hover">
+          <table className="table-heading">
+            {colgroup}
             <thead>
               <tr>
                 <th />
@@ -89,20 +95,20 @@ export class TodoListPage extends Component {
                 <th />
               </tr>
             </thead>
-            <tbody>
-              {data.map(this.renderItem)}
-            </tbody>
           </table>
+
+          <div className="table-body">
+            <table className="table table-condensed table-hover">
+              {colgroup}
+              <tbody>
+                {data.map(this.renderItem)}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     )
   }
-}
-
-TodoListPage.propTypes = {
-  busy: PropTypes.bool,
-  children: PropTypes.node,
-  fetchTodos: PropTypes.func.isRequired
 }
 
 export function mapProps (state) {
@@ -110,4 +116,12 @@ export function mapProps (state) {
   return { busy, error, data }
 }
 
-export default bindResource({todos}, {mapProps})(TodoListPage)
+const actions = {
+  fetch: todos.fetch,
+  update: todos.update,
+  toggle: todo => todos.update({ ...todo, completed: !todo.completed }),
+  destroy: todos.destroy,
+  reset: todos.reset,
+}
+
+export default connect(mapProps, actions)(TodoListPage)

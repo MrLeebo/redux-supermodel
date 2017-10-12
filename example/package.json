@@ -4,21 +4,21 @@
   "version": "0.1.0",
   "private": true,
   "devDependencies": {
-    "gh-pages": "^0.12.0",
-    "react-scripts": "^1.0.11"
+    "gh-pages": "^1.0.0",
+    "react-scripts": "^1.0.14"
   },
   "dependencies": {
     "classnames": "^2.2.5",
     "lodash": "^4.17.4",
-    "prop-types": "^15.5.8",
-    "react": "~15.4.2",
-    "react-dom": "~15.4.2",
-    "react-redux": "^5.0.4",
-    "react-router-dom": "^4.1.1",
-    "redux": "^3.6.0",
-    "redux-logger": "^3.0.1",
-    "redux-promise-middleware": "^4.2.0",
-    "redux-supermodel": "^0.13.0"
+    "prop-types": "^15.6.0",
+    "react": "^15.6.1",
+    "react-dom": "^15.6.1",
+    "react-redux": "^5.0.6",
+    "react-router-dom": "^4.2.2",
+    "redux": "^3.7.2",
+    "redux-logger": "^3.0.6",
+    "redux-promise-middleware": "^4.4.1",
+    "redux-supermodel": "^0.17.0"
   },
   "scripts": {
     "start": "react-scripts start",

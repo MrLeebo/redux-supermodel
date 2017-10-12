@@ -24,8 +24,7 @@ export default function Navbar () {
             </li>
             <li className='pull-right'>
               <small>
-                (Don't forget to turn on
-                the <a href='https://github.com/zalmoxisus/redux-devtools-extension'>Redux DevTools</a> extension.)
+                (Don&apos;t forget to turn on the <a href='https://github.com/zalmoxisus/redux-devtools-extension'>Redux DevTools</a> extension.)
               </small>
             </li>
           </ul>
