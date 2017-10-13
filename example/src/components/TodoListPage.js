@@ -3,7 +3,6 @@ import { connect } from 'react-redux'
 import './TodoList.css'
 import TodoListTableRow from './TodoListTableRow'
 import resources from '../lib/resources'
-const { todos } = resources
 
 const source = 'https://github.com/MrLeebo/redux-supermodel/blob/master/example/src/components/TodoListPage.js'
 const documentation = 'https://github.com/MrLeebo/redux-supermodel/blob/master/docs/api.md'
@@ -112,16 +111,16 @@ export class TodoListPage extends Component {
 }
 
 export function mapProps (state) {
-  const { busy, error, payload: { data = [] } } = todos(state)
+  const { busy, error, payload: { data = [] } } = resources.todos(state)
   return { busy, error, data }
 }
 
 const actions = {
-  fetch: todos.fetch,
-  update: todos.update,
-  toggle: todo => todos.update({ ...todo, completed: !todo.completed }),
-  destroy: todos.destroy,
-  reset: todos.reset,
+  fetch: resources.todos.fetch,
+  update: resources.todos.update,
+  toggle: todo => resources.todos.update({ ...todo, completed: !todo.completed }),
+  destroy: resources.todos.destroy,
+  reset: resources.todos.reset,
 }
 
 export default connect(mapProps, actions)(TodoListPage)

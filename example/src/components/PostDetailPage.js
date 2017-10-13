@@ -2,7 +2,6 @@ import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { Link } from 'react-router-dom'
 import resources from '../lib/resources'
-const { posts } = resources
 
 const source = 'https://github.com/MrLeebo/redux-supermodel/blob/master/example/src/components/PostDetailPage.js'
 const documentation = 'https://github.com/MrLeebo/redux-supermodel/blob/master/docs/api.md#resources'
@@ -73,14 +72,14 @@ export class PostDetailPage extends Component {
 }
 
 export function mapProps (state) {
-  const { ready, error, payload } = posts(state)
+  const { ready, error, payload } = resources.post(state)
   const { data: { id, title, body } = {} } = payload
   return { ready, error, id, title, body }
 }
 
 const actions = {
-  fetch: id => posts.fetch({id}),
-  reset: posts.reset,
+  fetch: id => resources.post.fetch({id}),
+  reset: resources.post.reset,
 }
 
 export default connect(mapProps, actions)(PostDetailPage)
