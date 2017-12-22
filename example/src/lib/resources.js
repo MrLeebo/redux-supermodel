@@ -1,5 +1,5 @@
 import { createClient, collectionTransform } from 'redux-supermodel'
-const client = createClient('api')
+const client = createClient('/api')
 
 export default client({
   post: { urlRoot: 'posts' },
