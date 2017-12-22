@@ -24,6 +24,8 @@ export default function Navbar () {
             </li>
             <li className='pull-right'>
               <small>
+                You must have <a href="https://caniuse.com/#feat=serviceworkers">service workers</a> enabled for this demo to work.
+                <br />
                 (Don&apos;t forget to turn on the <a href='https://github.com/zalmoxisus/redux-devtools-extension'>Redux DevTools</a> extension.)
               </small>
             </li>

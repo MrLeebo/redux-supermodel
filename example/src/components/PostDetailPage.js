@@ -6,8 +6,21 @@ import resources from '../lib/resources'
 const source = 'https://github.com/MrLeebo/redux-supermodel/blob/master/example/src/components/PostDetailPage.js'
 const documentation = 'https://github.com/MrLeebo/redux-supermodel/blob/master/docs/api.md#resources'
 
+const FormGroup = ({label, children}) => (
+  <div className='form-group'>
+    <label className='control-label col-md-1'>{label}</label>
+    <div className='col-md-11'>
+      {children}
+    </div>
+  </div>
+)
+
 export class PostDetailPage extends Component {
-  componentDidMount = () => this.fetchPost(this.props)
+  componentDidMount = () => {
+    if (this.props.match.params.id !== 'new') {
+      this.fetchPost(this.props)
+    }
+  }
 
   componentWillReceiveProps = nextProps => {
     if (this.props.match.params.id !== nextProps.match.params.id) {
@@ -19,14 +32,31 @@ export class PostDetailPage extends Component {
 
   fetchPost = props => props.fetch(props.match.params.id)
 
-  render () {
-    const { ready, error, id, title, body } = this.props
+  submit = async e => {
+    e.preventDefault()
 
-    if (!ready) return <i className='fa fa-refresh fa-spin' />
+    const {
+      id, title, author, body
+    } = document.forms.details
+
+    const res = await this.props.save({
+      id: id.value,
+      title: title.value,
+      author: author.value,
+      body: body.value
+    })
+
+    this.props.history.replace(`/posts/${res.value.data.id}`)
+  }
+
+  render () {
+    const { match, ready, error, id, title, author, body } = this.props
+
+    if (!ready && match.params.id !== 'new') return <i className='fa fa-refresh fa-spin' />
     if (error) return <i className='text-danger'>An error occurred: {error.message}</i>
 
     return (
-      <form className='form form-horizontal'>
+      <form name="details" className='form form-horizontal' onSubmit={this.submit}>
         <div>
           <h1>
             <ul className='list-inline'>
@@ -46,26 +76,23 @@ export class PostDetailPage extends Component {
         </div>
         <hr />
 
-        <input type='hidden' name='id' value={id} />
+        <input type='hidden' name='id' defaultValue={id} />
 
-        <div className='form-group'>
-          <label className='control-label col-md-1'>Title</label>
-          <div className='col-md-11'>
-            <input type='text' name='title' defaultValue={title} className='form-control' readOnly />
-          </div>
-        </div>
+        <FormGroup label="Title">
+          <input type='text' name="title" defaultValue={title} className='form-control' />
+        </FormGroup>
 
-        <div className='form-group'>
-          <label className='control-label col-md-1'>Body</label>
-          <div className='col-md-11'>
-            <textarea name='body' defaultValue={body} className='form-control' rows={6} readOnly />
-          </div>
-        </div>
+        <FormGroup label="Author">
+          <input type='text' name="author" defaultValue={author} className='form-control' />
+        </FormGroup>
 
-        <div>
-          {id < 100 && <Link to={`/posts/${id + 1}`} className='btn btn-default pull-right'>Next</Link>}
-          {id > 1 && <Link to={`/posts/${id - 1}`} className='btn btn-default pull-left'>Previous</Link>}
-        </div>
+        <FormGroup label="Body">
+          <textarea name='body' defaultValue={body} className='form-control' rows={6} />
+        </FormGroup>
+
+        <FormGroup>
+          <button type="submit" className="btn btn-primary">Submit</button>
+        </FormGroup>
       </form>
     )
   }
@@ -73,12 +100,13 @@ export class PostDetailPage extends Component {
 
 export function mapProps (state) {
   const { ready, error, payload } = resources.post(state)
-  const { data: { id, title, body } = {} } = payload
-  return { ready, error, id, title, body }
+  const { data = {} } = payload
+  return { ready, error, ...data }
 }
 
 const actions = {
   fetch: id => resources.post.fetch({id}),
+  save: values => resources.post[values.id ? 'update' : 'create'](values),
   reset: resources.post.reset,
 }
 

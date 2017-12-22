@@ -16,6 +16,14 @@ export class PostListPage extends Component {
     if (!ready) return <i className='fa fa-refresh fa-spin' />
     if (error) return <i className='text-danger'>An error occurred: {error.message}</i>
 
+    const colgroup = (
+      <colgroup>
+        <col style={{ width: '1*' }} />
+        <col style={{ width: 300 }} />
+        <col style={{ width: 200 }} />
+      </colgroup>
+    )
+
     return (
       <div className='container'>
         <div>
@@ -27,7 +35,7 @@ export class PostListPage extends Component {
             </ul>
 
             <div className="pull-right">
-              <button onClick={fetch} className="btn btn-default">Refresh</button>
+              <button onClick={fetch} className="btn btn-default">Refresh</button> <Link to="/posts/new" className="btn btn-success">Create New Post</Link>
             </div>
 
             <p className='lead'>
@@ -37,18 +45,28 @@ export class PostListPage extends Component {
         </div>
         <hr />
 
-        <table className="table-heading">
+        <table className="table table-heading">
+          {colgroup}
           <thead>
             <tr>
-              <th>Post</th>
+              <th>Title</th>
+              <th>Author</th>
+              <th>Posted On</th>
             </tr>
           </thead>
         </table>
 
         <div className="table-body">
           <table className='table table-striped table-condensed'>
+            {colgroup}
             <tbody>
-              {data.map(({id, title}) => <tr key={id}><td><Link to={`/posts/${id}`}>{title}</Link></td></tr>)}
+              {data.map(({id, title, author, posted}) => (
+                <tr key={id}>
+                  <td><Link to={`/posts/${id}`}>{title}</Link></td>
+                  <td>{author}</td>
+                  <td className="text-muted">{new Date(posted).toLocaleDateString()}</td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>

@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import './TodoList.css'
+import TodoListForm from './TodoListForm'
 import TodoListTableRow from './TodoListTableRow'
 import resources from '../lib/resources'
 
@@ -10,7 +11,11 @@ const documentation = 'https://github.com/MrLeebo/redux-supermodel/blob/master/d
 export class TodoListPage extends Component {
   state = { selected: null }
 
-  componentDidMount = () => this.props.fetch()
+  componentDidMount = () => {
+    if ('serviceWorker' in window.navigator) {
+      this.props.fetch()
+    }
+  }
 
   componentWillUnmount = () => this.props.reset()
 
@@ -28,23 +33,29 @@ export class TodoListPage extends Component {
     this.setState({ selected: null })
   }
 
-  renderItem = todo => {
+  handleSubmitAdd = title => {
+    this.props.create({ title })
+  }
+
+  refTitle = ref => this.title = ref
+
+  renderItem = (todo, n) => {
     const { toggle, destroy } = this.props
 
     return (
       <TodoListTableRow
-        key={todo.id}
+        key={n}
         todo={todo}
         onChange={toggle}
         onDelete={destroy}
         onEdit={this.handleEdit}
         onSubmitEdit={this.handleSubmitEdit}
-        editing={this.state.selected === todo.id}
+        editing={this.state.selected === n}
       />
     )
   }
 
-  render() {
+  renderPanel = () => {
     const { busy, error, data } = this.props
 
     const colgroup = (
@@ -56,11 +67,48 @@ export class TodoListPage extends Component {
     )
 
     return (
+      <div className="panel panel-info">
+        <div className="panel-heading">
+          <button
+            type="button"
+            className="btn btn-default"
+            disabled={busy}
+            onClick={this.handleRefresh}
+          >
+            {busy && <i className="fa fa-refresh fa-spin" />} Refresh
+          </button>
+
+          {error && <span className="text-danger">{error.message}</span>}
+        </div>
+
+        <table className="table-heading">
+          {colgroup}
+        </table>
+
+        <div className="table-body">
+          <table className="table table-condensed table-hover">
+            {colgroup}
+            <tbody>
+              <tr>
+                <td colSpan={3}>
+                  <TodoListForm onSubmit={this.handleSubmitAdd} />
+                </td>
+              </tr>
+              {data.map(this.renderItem)}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    )
+  }
+
+  render() {
+    return (
       <div>
         <div>
           <h1>
             <ul className="list-inline">
-              <li>todo list</li>
+              <li>task list</li>
               <li><a target="_blank" href={source}><small>view source</small></a></li>
               <li className="pull-right"><a target="_blank" href={documentation}><small>documentation</small></a></li>
             </ul>
@@ -71,40 +119,7 @@ export class TodoListPage extends Component {
         </div>
         <hr />
 
-        <div className="panel panel-info">
-          <div className="panel-heading">
-            <button
-              type="button"
-              className="btn btn-default"
-              disabled={busy}
-              onClick={this.handleRefresh}
-            >
-              {busy && <i className="fa fa-refresh fa-spin" />} Refresh
-            </button>
-
-            {error && <span className="text-danger">{error.message}</span>}
-          </div>
-
-          <table className="table-heading">
-            {colgroup}
-            <thead>
-              <tr>
-                <th />
-                <th>Todo</th>
-                <th />
-              </tr>
-            </thead>
-          </table>
-
-          <div className="table-body">
-            <table className="table table-condensed table-hover">
-              {colgroup}
-              <tbody>
-                {data.map(this.renderItem)}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        {('serviceWorker' in window.navigator) ? this.renderPanel() : <div className="help-block">Sorry, this demo requires a browser that supports service workers.</div>}
       </div>
     )
   }
@@ -117,6 +132,7 @@ export function mapProps (state) {
 
 const actions = {
   fetch: resources.todos.fetch,
+  create: resources.todos.create,
   update: resources.todos.update,
   toggle: todo => resources.todos.update({ ...todo, completed: !todo.completed }),
   destroy: resources.todos.destroy,
