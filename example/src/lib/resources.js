@@ -1,9 +1,7 @@
 import { createClient, collectionTransform } from 'redux-supermodel'
-const client = createClient('/api')
+const client = createClient('https://mighty-harbor-19102.herokuapp.com/api')
 
 export default client({
-  post: { urlRoot: 'posts' },
-  posts: { url: 'posts' },
-  todos: { urlRoot: 'tasks', transform: collectionTransform },
-  users: true,
+  contact: { urlRoot: 'contacts', idAttribute: '_id' },
+  contacts: { urlRoot: 'contacts', idAttribute: '_id', transform: collectionTransform }
 })

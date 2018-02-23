@@ -15,11 +15,12 @@
     "react-dom": "^15.6.1",
     "react-redux": "^5.0.6",
     "react-router-dom": "^4.2.2",
+    "recompose": "^0.26.0",
     "redux": "^3.7.2",
+    "redux-form": "^7.2.3",
     "redux-logger": "^3.0.6",
     "redux-promise-middleware": "^4.4.1",
-    "redux-supermodel": "^0.18.0",
-    "sw-toolbox": "^3.6.0"
+    "redux-supermodel": "^0.18.0"
   },
   "scripts": {
     "start": "react-scripts start",

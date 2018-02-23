@@ -1,0 +1,17 @@
+.table-fixed-header .table {
+  table-layout: fixed;
+  word-wrap: break-word;
+  margin-bottom: 0;
+}
+
+.table-fixed-header .table-header {
+  overflow-y: scroll;
+  overflow-y: overlay;
+}
+
+.table-fixed-header .table-body {
+  max-height: 450px;
+  max-height: 55vh;
+  overflow-y: scroll;
+  overflow-y: overlay;
+}

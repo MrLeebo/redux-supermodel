@@ -1,22 +1,19 @@
 import React from 'react'
 import { Route } from 'react-router-dom'
 
-import Home from './Home'
 import Navbar from './Navbar'
-import PostDetailPage from './PostDetailPage'
-import PostListPage from './PostListPage'
-import TodoListPage from './TodoListPage'
+import ContactDetailPage from './ContactDetailPage'
+import ContactListPage from './ContactListPage'
 
-export default function App () {
+export default function App() {
   return (
     <div className='App'>
       <Navbar />
 
       <div className='container'>
-        <Route path='/' exact component={Home} />
-        <Route path='/posts/:id' component={PostDetailPage} />
-        <Route path='/posts' exact component={PostListPage} />
-        <Route path='/todoList' component={TodoListPage} />
+        <Route path='/' exact component={ContactListPage} />
+        <Route path='/contacts/:id' component={ContactDetailPage} />
+        <Route path='/contacts' exact component={ContactListPage} />
       </div>
     </div>
   )
